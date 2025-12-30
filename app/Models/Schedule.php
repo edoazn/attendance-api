@@ -39,6 +39,10 @@ class Schedule extends Model
     public function isActive(): bool
     {
         $now = Carbon::now();
-        return $now->between($this->start_time, $this->end_time);
+        // Toleransi 5 menit sebelum dan sesudah jadwal
+        $startWithTolerance = $this->start_time->copy()->subMinutes(5);
+        $endWithTolerance = $this->end_time->copy()->addMinutes(5);
+        
+        return $now->between($startWithTolerance, $endWithTolerance);
     }
 }

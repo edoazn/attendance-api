@@ -49,9 +49,10 @@ class AttendanceController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        $history = $this->attendanceService->getUserHistory($request->user());
+        $perPage = $request->input('per_page', 15);
+        $history = $this->attendanceService->getUserHistory($request->user(), $perPage);
 
-        $data = $history->map(function ($attendance) {
+        $data = $history->getCollection()->map(function ($attendance) {
             return [
                 'id' => $attendance->id,
                 'schedule' => [
@@ -68,6 +69,12 @@ class AttendanceController extends Controller
 
         return response()->json([
             'data' => $data,
+            'meta' => [
+                'current_page' => $history->currentPage(),
+                'last_page' => $history->lastPage(),
+                'per_page' => $history->perPage(),
+                'total' => $history->total(),
+            ],
         ]);
     }
 

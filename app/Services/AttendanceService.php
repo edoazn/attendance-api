@@ -111,17 +111,18 @@ class AttendanceService
     }
 
     /**
-     * Get user's attendance history with schedule details
+     * Get user's attendance history with schedule details (paginated)
      *
      * @param User $user
-     * @return Collection
+     * @param int $perPage
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
      */
-    public function getUserHistory(User $user): Collection
+    public function getUserHistory(User $user, int $perPage = 15)
     {
         return Attendance::with(['schedule.course', 'schedule.location'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate($perPage);
     }
 
     /**
