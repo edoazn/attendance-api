@@ -97,16 +97,18 @@ class AttendanceService
     }
 
     /**
-     * Check if user has already submitted attendance for this schedule
+     * Check if user has already successfully attended this schedule
+     * Only blocks if status is 'hadir', allows retry if 'ditolak'
      *
      * @param User $user
      * @param Schedule $schedule
-     * @return bool True if duplicate exists
+     * @return bool True if already attended (hadir)
      */
     private function checkDuplicateAttendance(User $user, Schedule $schedule): bool
     {
         return Attendance::where('user_id', $user->id)
             ->where('schedule_id', $schedule->id)
+            ->where('status', 'hadir')
             ->exists();
     }
 
