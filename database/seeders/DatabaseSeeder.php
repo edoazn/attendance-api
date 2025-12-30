@@ -84,22 +84,30 @@ class DatabaseSeeder extends Seeder
         Schedule::create([
             'course_id' => $course1->id,
             'location_id' => $gedungA->id,
-            'start_time' => $today . ' 08:00:00',
-            'end_time' => $today . ' 10:00:00',
+            'start_time' => "{$today} 08:00:00",
+            'end_time' => "{$today} 10:00:00",
         ]);
 
         Schedule::create([
             'course_id' => $course2->id,
             'location_id' => $gedungA->id,
-            'start_time' => $today . ' 10:30:00',
-            'end_time' => $today . ' 12:30:00',
+            'start_time' => "{$today} 10:30:00",
+            'end_time' => "{$today} 12:30:00",
         ]);
 
         Schedule::create([
             'course_id' => $course3->id,
             'location_id' => $gedungB->id,
-            'start_time' => $today . ' 13:00:00',
-            'end_time' => $today . ' 15:00:00',
+            'start_time' => "{$today} 13:00:00",
+            'end_time' => "{$today} 15:00:00",
+        ]);
+
+        // Schedule untuk testing - aktif sepanjang hari
+        Schedule::create([
+            'course_id' => $course1->id,
+            'location_id' => $gedungA->id,
+            'start_time' => "{$today} 00:00:00",
+            'end_time' => "{$today} 23:59:59",
         ]);
 
         $this->command->info('Seeding completed!');

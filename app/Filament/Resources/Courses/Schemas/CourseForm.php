@@ -14,19 +14,19 @@ class CourseForm
                 TextInput::make('course_name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Course Name'),
+                    ->label('Nama Mata Kuliah'),
                 TextInput::make('course_code')
                     ->required()
                     ->maxLength(50)
                     ->unique(ignoreRecord: true)
-                    ->label('Course Code'),
+                    ->label('Kode MK'),
                 TextInput::make('lecturer_name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Lecturer Name'),
+                    ->label('Nama Dosen'),
                 TextInput::make('location_room')
                     ->maxLength(100)
-                    ->label('Location/Room'),
+                    ->label('Ruangan'),
             ]);
     }
 }

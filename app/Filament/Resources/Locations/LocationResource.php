@@ -21,9 +21,17 @@ class LocationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
+    protected static string|UnitEnum|null $navigationGroup = 'Data Master';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $modelLabel = 'Lokasi';
+
+    protected static ?string $pluralModelLabel = 'Lokasi';
+
+    protected static ?string $navigationLabel = 'Lokasi';
 
     public static function form(Schema $schema): Schema
     {
@@ -53,6 +61,6 @@ class LocationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return (string) static::getModel()::count();
     }
 }

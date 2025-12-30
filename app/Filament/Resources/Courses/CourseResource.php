@@ -21,9 +21,17 @@ class CourseResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
+    protected static string|UnitEnum|null $navigationGroup = 'Data Master';
 
     protected static ?string $recordTitleAttribute = 'course_name';
+
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $modelLabel = 'Mata Kuliah';
+
+    protected static ?string $pluralModelLabel = 'Mata Kuliah';
+
+    protected static ?string $navigationLabel = 'Mata Kuliah';
 
     public static function form(Schema $schema): Schema
     {

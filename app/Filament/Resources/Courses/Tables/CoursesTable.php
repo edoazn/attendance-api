@@ -17,23 +17,25 @@ class CoursesTable
                 TextColumn::make('course_code')
                     ->searchable()
                     ->sortable()
-                    ->label('Course Code'),
+                    ->label('Kode MK'),
                 TextColumn::make('course_name')
                     ->searchable()
                     ->sortable()
-                    ->label('Course Name'),
+                    ->label('Nama Mata Kuliah'),
                 TextColumn::make('lecturer_name')
                     ->searchable()
                     ->sortable()
-                    ->label('Lecturer'),
+                    ->label('Dosen'),
                 TextColumn::make('location_room')
                     ->searchable()
-                    ->label('Location/Room'),
+                    ->label('Ruangan'),
                 TextColumn::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Diperbarui')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -48,6 +50,8 @@ class CoursesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(10)
+            ->paginationPageOptions([10, 25, 50, 100]);
     }
 }

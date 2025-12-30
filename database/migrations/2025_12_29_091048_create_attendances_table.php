@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('schedule_id')->constrained()->onDelete('cascade');
-            $table->decimal('latitude', 10, 7);
-            $table->decimal('longitude', 10, 7);
+            $table->decimal('latitude', 17, 14);
+            $table->decimal('longitude', 18, 14);
             $table->decimal('distance', 10, 2);
             $table->enum('status', ['hadir', 'ditolak']);
             $table->timestamps();

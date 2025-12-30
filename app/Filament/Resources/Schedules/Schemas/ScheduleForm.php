@@ -15,23 +15,23 @@ class ScheduleForm
         return $schema
             ->components([
                 Select::make('course_id')
-                    ->label('Course')
+                    ->label('Mata Kuliah')
                     ->relationship('course', 'course_name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Select::make('location_id')
-                    ->label('Location')
+                    ->label('Lokasi')
                     ->relationship('location', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 DateTimePicker::make('start_time')
-                    ->label('Start Time')
+                    ->label('Waktu Mulai')
                     ->required()
                     ->native(false),
                 DateTimePicker::make('end_time')
-                    ->label('End Time')
+                    ->label('Waktu Selesai')
                     ->required()
                     ->native(false)
                     ->after('start_time'),

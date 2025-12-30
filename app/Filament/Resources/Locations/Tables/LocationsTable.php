@@ -15,22 +15,28 @@ class LocationsTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nama')
                     ->searchable(),
                 TextColumn::make('latitude')
+                    ->label('Latitude')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('longitude')
+                    ->label('Longitude')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('radius')
+                    ->label('Radius')
                     ->numeric()
                     ->sortable()
                     ->suffix(' m'),
                 TextColumn::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Diperbarui')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -45,6 +51,8 @@ class LocationsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(10)
+            ->paginationPageOptions([10, 25, 50, 100]);
     }
 }

@@ -14,15 +14,17 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nama')
                     ->required()
                     ->maxLength(255),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Alamat Email')
                     ->email()
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Select::make('role')
+                    ->label('Peran')
                     ->options([
                         'admin' => 'Admin',
                         'mahasiswa' => 'Mahasiswa',
@@ -30,6 +32,7 @@ class UserForm
                     ->default('mahasiswa')
                     ->required(),
                 TextInput::make('password')
+                    ->label('Kata Sandi')
                     ->password()
                     ->required(fn ($record) => $record === null)
                     ->dehydrateStateUsing(fn ($state) => $state ? Hash::make($state) : null)

@@ -21,7 +21,15 @@ class ScheduleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendar;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
+    protected static string|UnitEnum|null $navigationGroup = 'Data Master';
+
+    protected static ?int $navigationSort = 3;
+
+    protected static ?string $modelLabel = 'Jadwal';
+
+    protected static ?string $pluralModelLabel = 'Jadwal';
+
+    protected static ?string $navigationLabel = 'Jadwal';
 
     public static function form(Schema $schema): Schema
     {

@@ -16,38 +16,40 @@ class SchedulesTable
         return $table
             ->columns([
                 TextColumn::make('course.course_name')
-                    ->label('Course')
+                    ->label('Mata Kuliah')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('location.name')
-                    ->label('Location')
+                    ->label('Lokasi')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('start_time')
-                    ->label('Start Time')
+                    ->label('Waktu Mulai')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('end_time')
-                    ->label('End Time')
+                    ->label('Waktu Selesai')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Diperbarui')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('course_id')
-                    ->label('Course')
+                    ->label('Mata Kuliah')
                     ->relationship('course', 'course_name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('location_id')
-                    ->label('Location')
+                    ->label('Lokasi')
                     ->relationship('location', 'name')
                     ->searchable()
                     ->preload(),
@@ -59,6 +61,8 @@ class SchedulesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(10)
+            ->paginationPageOptions([10, 25, 50, 100]);
     }
 }
