@@ -40,7 +40,7 @@ test('Property 1.1: Valid credentials return a token', function () {
             'role' => $userData['role'],
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => $userData['email'],
             'password' => $userData['password'],
         ]);
@@ -56,7 +56,7 @@ test('Property 1.1: Valid credentials return a token', function () {
         
         // Clean up tokens for next iteration
         $user->tokens()->delete();
-        $user->delete();
+        $user->forceDelete();
     }
 })->group('property');
 
@@ -74,7 +74,7 @@ test('Property 1.2: Invalid credentials return 401', function () {
             'role' => $userData['role'],
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => $userData['email'],
             'password' => 'wrong_password_' . fake()->word(),
         ]);
@@ -82,7 +82,7 @@ test('Property 1.2: Invalid credentials return 401', function () {
         $response->assertStatus(401)
             ->assertJson(['message' => 'Invalid credentials']);
         
-        $user->delete();
+        $user->forceDelete();
     }
 })->group('property');
 
@@ -104,12 +104,12 @@ test('Property 1.3: Token round-trip - login then logout invalidates token', fun
         $this->actingAs($user, 'sanctum');
         
         // Create a token for the user
-        $tokenResult = $user->createToken('auth-token');
+        $user->createToken('auth-token');
         
         expect($user->tokens()->count())->toBe(1);
 
         // Logout
-        $logoutResponse = $this->postJson('/api/logout');
+        $logoutResponse = $this->postJson('/api/v1/logout');
 
         $logoutResponse->assertStatus(200)
             ->assertJson(['message' => 'Logged out successfully']);
@@ -119,7 +119,7 @@ test('Property 1.3: Token round-trip - login then logout invalidates token', fun
         expect($user->tokens()->count())->toBe(0);
         
         // Clean up for next iteration
-        $user->delete();
+        $user->forceDelete();
     }
 })->group('property');
 
@@ -129,7 +129,7 @@ test('Property 1.3: Token round-trip - login then logout invalidates token', fun
  */
 test('Property 1.4: Non-existent user returns 401', function () {
     for ($i = 0; $i < 100; $i++) {
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => fake()->unique()->safeEmail(),
             'password' => fake()->password(),
         ]);

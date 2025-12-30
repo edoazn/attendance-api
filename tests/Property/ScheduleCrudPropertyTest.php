@@ -85,7 +85,7 @@ test('Property 5.1: Create schedule then retrieve returns equivalent data with r
 
         // Create schedule
         $createResponse = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/schedules', $scheduleData);
+            ->postJson('/api/v1/schedules', $scheduleData);
 
         $createResponse->assertStatus(201)
             ->assertJsonStructure([
@@ -105,7 +105,7 @@ test('Property 5.1: Create schedule then retrieve returns equivalent data with r
 
         // Retrieve all schedules
         $indexResponse = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/schedules');
+            ->getJson('/api/v1/schedules');
 
         $indexResponse->assertStatus(200);
 
@@ -128,10 +128,10 @@ test('Property 5.1: Create schedule then retrieve returns equivalent data with r
         expect($retrievedSchedule['location']['name'])->toBe($location->name);
 
         // Clean up
-        Schedule::destroy($createdId);
-        $course->delete();
-        $location->delete();
-        $admin->delete();
+        Schedule::where('id', $createdId)->forceDelete();
+        $course->forceDelete();
+        $location->forceDelete();
+        $admin->forceDelete();
     }
 })->group('property');
 
@@ -156,14 +156,14 @@ test('Property 5.2: Index returns all created schedules with relationships', fun
 
             $scheduleData = generateValidScheduleData($course->id, $location->id);
             $response = $this->actingAs($admin, 'sanctum')
-                ->postJson('/api/schedules', $scheduleData);
+                ->postJson('/api/v1/schedules', $scheduleData);
             
             $createdIds[] = $response->json('data.id');
         }
 
         // Retrieve all schedules
         $indexResponse = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/schedules');
+            ->getJson('/api/v1/schedules');
 
         $indexResponse->assertStatus(200);
         $schedules = collect($indexResponse->json('data'));
@@ -177,14 +177,14 @@ test('Property 5.2: Index returns all created schedules with relationships', fun
         }
 
         // Clean up
-        Schedule::destroy($createdIds);
+        Schedule::whereIn('id', $createdIds)->forceDelete();
         foreach ($courses as $course) {
-            $course->delete();
+            $course->forceDelete();
         }
         foreach ($locations as $location) {
-            $location->delete();
+            $location->forceDelete();
         }
-        $admin->delete();
+        $admin->forceDelete();
     }
 })->group('property');
 
@@ -211,14 +211,14 @@ test('Property 5.3: Schedule validation rejects invalid end_time', function () {
 
         // Attempt to create schedule with invalid end_time
         $response = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/schedules', $invalidScheduleData);
+            ->postJson('/api/v1/schedules', $invalidScheduleData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['end_time']);
 
         // Clean up
-        $course->delete();
-        $location->delete();
-        $admin->delete();
+        $course->forceDelete();
+        $location->forceDelete();
+        $admin->forceDelete();
     }
 })->group('property');

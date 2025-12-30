@@ -51,7 +51,7 @@ test('Property 4.1: Create location then retrieve returns equivalent data', func
 
         // Create location
         $createResponse = $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/locations', $locationData);
+            ->postJson('/api/v1/locations', $locationData);
 
         $createResponse->assertStatus(201)
             ->assertJsonStructure([
@@ -63,7 +63,7 @@ test('Property 4.1: Create location then retrieve returns equivalent data', func
 
         // Retrieve all locations
         $indexResponse = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/locations');
+            ->getJson('/api/v1/locations');
 
         $indexResponse->assertStatus(200);
 
@@ -78,8 +78,8 @@ test('Property 4.1: Create location then retrieve returns equivalent data', func
         expect(abs((float) $retrievedLocation['radius'] - $locationData['radius']))->toBeLessThan(0.01);
 
         // Clean up
-        Location::destroy($createdId);
-        $admin->delete();
+        Location::where('id', $createdId)->forceDelete();
+        $admin->forceDelete();
     }
 })->group('property');
 
@@ -98,14 +98,14 @@ test('Property 4.2: Update location then retrieve returns updated data', functio
 
         // Update location
         $updateResponse = $this->actingAs($admin, 'sanctum')
-            ->putJson("/api/locations/{$location->id}", $updatedData);
+            ->putJson("/api/v1/locations/{$location->id}", $updatedData);
 
         $updateResponse->assertStatus(200)
             ->assertJson(['message' => 'Location updated successfully']);
 
         // Retrieve and verify
         $indexResponse = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/locations');
+            ->getJson('/api/v1/locations');
 
         $locations = collect($indexResponse->json('data'));
         $retrievedLocation = $locations->firstWhere('id', $location->id);
@@ -116,8 +116,8 @@ test('Property 4.2: Update location then retrieve returns updated data', functio
         expect(abs((float) $retrievedLocation['radius'] - $updatedData['radius']))->toBeLessThan(0.01);
 
         // Clean up
-        $location->delete();
-        $admin->delete();
+        $location->forceDelete();
+        $admin->forceDelete();
     }
 })->group('property');
 
@@ -135,14 +135,14 @@ test('Property 4.3: Index returns all created locations', function () {
         for ($j = 0; $j < $locationCount; $j++) {
             $locationData = generateValidLocationData();
             $response = $this->actingAs($admin, 'sanctum')
-                ->postJson('/api/locations', $locationData);
+                ->postJson('/api/v1/locations', $locationData);
             
             $createdIds[] = $response->json('data.id');
         }
 
         // Retrieve all locations
         $indexResponse = $this->actingAs($admin, 'sanctum')
-            ->getJson('/api/locations');
+            ->getJson('/api/v1/locations');
 
         $indexResponse->assertStatus(200);
         $locations = collect($indexResponse->json('data'));
@@ -153,7 +153,7 @@ test('Property 4.3: Index returns all created locations', function () {
         }
 
         // Clean up
-        Location::destroy($createdIds);
-        $admin->delete();
+        Location::whereIn('id', $createdIds)->forceDelete();
+        $admin->forceDelete();
     }
 })->group('property');
