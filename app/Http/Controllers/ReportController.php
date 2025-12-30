@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AttendanceExport;
 use App\Http\Requests\ReportRequest;
 use App\Services\ReportService;
 use Illuminate\Http\JsonResponse;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportController extends Controller
 {
@@ -46,5 +49,22 @@ class ReportController extends Controller
         return response()->json([
             'data' => $data,
         ]);
+    }
+
+    /**
+     * Export attendance report to Excel.
+     */
+    public function exportExcel(ReportRequest $request): BinaryFileResponse
+    {
+        $filename = 'laporan-absensi-' . now()->format('Y-m-d-His') . '.xlsx';
+
+        return Excel::download(
+            new AttendanceExport(
+                $request->start_date,
+                $request->end_date,
+                $request->schedule_id
+            ),
+            $filename
+        );
     }
 }

@@ -35,5 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Reports
         Route::get('/reports/attendance', [ReportController::class, 'attendanceReport']);
+        Route::get('/reports/attendance/export', [ReportController::class, 'exportExcel']);
     });
 });
