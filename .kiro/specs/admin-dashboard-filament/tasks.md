@@ -93,7 +93,7 @@ Implementasi Admin Dashboard menggunakan Filament v4 untuk sistem absensi mahasi
     - Add course and location filters
     - _Requirements: 5.6, 5.7_
 
-- [ ] 7. Checkpoint - CRUD Resources
+- [x] 7. Checkpoint - CRUD Resources
   - Verify all CRUD operations work
   - Verify validations work
   - Ask user if questions arise
