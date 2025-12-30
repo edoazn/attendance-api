@@ -11,7 +11,45 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     /**
-     * Handle user login and return Sanctum token.
+     * @OA\Post(
+     *     path="/login",
+     *     summary="Login user",
+     *     description="Autentikasi user dan mendapatkan token akses",
+     *     operationId="login",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string", format="email", example="budi@mahasiswa.ac.id"),
+     *             @OA\Property(property="password", type="string", format="password", example="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login berhasil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="1|abc123xyz..."),
+     *             @OA\Property(property="user", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Budi Santoso"),
+     *                 @OA\Property(property="email", type="string", example="budi@mahasiswa.ac.id"),
+     *                 @OA\Property(property="role", type="string", example="mahasiswa")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Kredensial tidak valid",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid credentials")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validasi gagal"
+     *     )
+     * )
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -37,7 +75,25 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle user logout by revoking current token.
+     * @OA\Post(
+     *     path="/logout",
+     *     summary="Logout user",
+     *     description="Logout dan menghapus semua token user",
+     *     operationId="logout",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logout berhasil",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Logged out successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
      */
     public function logout(Request $request): JsonResponse
     {

@@ -1,0 +1,1054 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sistem Absensi Mahasiswa Geolocation API",
+        "description": "API untuk sistem absensi mahasiswa berbasis geolocation. Mahasiswa dapat melakukan absensi dengan validasi lokasi GPS.",
+        "contact": {
+            "name": "Admin Support",
+            "email": "admin@kampus.ac.id"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api/v1",
+            "description": "API Server v1"
+        }
+    ],
+    "paths": {
+        "/attendance": {
+            "post": {
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Submit absensi",
+                "description": "Mahasiswa submit absensi dengan koordinat GPS. Status akan 'hadir' jika dalam radius lokasi, 'ditolak' jika di luar radius.",
+                "operationId": "storeAttendance",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "schedule_id",
+                                    "latitude",
+                                    "longitude"
+                                ],
+                                "properties": {
+                                    "schedule_id": {
+                                        "description": "ID jadwal yang akan diabsen",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "latitude": {
+                                        "description": "Latitude posisi user",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": -6.2
+                                    },
+                                    "longitude": {
+                                        "description": "Longitude posisi user",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 106.816666
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Absensi berhasil diproses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "hadir",
+                                                "ditolak"
+                                            ],
+                                            "example": "hadir"
+                                        },
+                                        "distance": {
+                                            "description": "Jarak dari lokasi dalam meter",
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 45.23
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Absensi berhasil dicatat"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Absensi gagal (di luar waktu jadwal atau sudah absen)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "distance": {
+                                            "type": "number",
+                                            "nullable": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Absensi hanya dapat dilakukan pada waktu jadwal aktif"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/attendance/history": {
+            "get": {
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Riwayat absensi user",
+                "description": "Mendapatkan riwayat absensi user yang sedang login (dengan pagination)",
+                "operationId": "attendanceHistory",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah data per halaman",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Nomor halaman",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mendapatkan riwayat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "schedule": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "course_name": {
+                                                                "type": "string",
+                                                                "example": "Pemrograman Web"
+                                                            },
+                                                            "start_time": {
+                                                                "type": "string",
+                                                                "format": "date-time"
+                                                            },
+                                                            "end_time": {
+                                                                "type": "string",
+                                                                "format": "date-time"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "hadir"
+                                                    },
+                                                    "distance": {
+                                                        "type": "number",
+                                                        "example": 45.23
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 75
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/schedules/today": {
+            "get": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Jadwal hari ini",
+                "description": "Mendapatkan daftar jadwal untuk hari ini",
+                "operationId": "todaySchedules",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mendapatkan jadwal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "course_name": {
+                                                        "type": "string",
+                                                        "example": "Pemrograman Web"
+                                                    },
+                                                    "location_name": {
+                                                        "type": "string",
+                                                        "example": "Gedung A - Fakultas Teknik"
+                                                    },
+                                                    "start_time": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "end_time": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user",
+                "description": "Autentikasi user dan mendapatkan token akses",
+                "operationId": "login",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "budi@mahasiswa.ac.id"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123xyz..."
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Budi Santoso"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "budi@mahasiswa.ac.id"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "mahasiswa"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Kredensial tidak valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "description": "Logout dan menghapus semua token user",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "Logout berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/locations": {
+            "get": {
+                "tags": [
+                    "Locations"
+                ],
+                "summary": "Daftar lokasi",
+                "description": "Mendapatkan semua lokasi absensi (Admin only)",
+                "operationId": "indexLocations",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Gedung A - Fakultas Teknik"
+                                                    },
+                                                    "latitude": {
+                                                        "type": "number",
+                                                        "example": -6.2
+                                                    },
+                                                    "longitude": {
+                                                        "type": "number",
+                                                        "example": 106.816666
+                                                    },
+                                                    "radius": {
+                                                        "type": "number",
+                                                        "example": 100
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Locations"
+                ],
+                "summary": "Tambah lokasi baru",
+                "description": "Membuat lokasi absensi baru (Admin only)",
+                "operationId": "storeLocation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "latitude",
+                                    "longitude",
+                                    "radius"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Gedung C - Lab Komputer"
+                                    },
+                                    "latitude": {
+                                        "description": "Latitude (-90 to 90)",
+                                        "type": "number",
+                                        "example": -6.201
+                                    },
+                                    "longitude": {
+                                        "description": "Longitude (-180 to 180)",
+                                        "type": "number",
+                                        "example": 106.817
+                                    },
+                                    "radius": {
+                                        "description": "Radius dalam meter",
+                                        "type": "number",
+                                        "example": 100
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Lokasi berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Location created successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/locations/{id}": {
+            "put": {
+                "tags": [
+                    "Locations"
+                ],
+                "summary": "Update lokasi",
+                "description": "Mengupdate lokasi absensi (Admin only)",
+                "operationId": "updateLocation",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID lokasi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "latitude",
+                                    "longitude",
+                                    "radius"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Gedung C - Lab Komputer Updated"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "example": -6.201
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "example": 106.817
+                                    },
+                                    "radius": {
+                                        "type": "number",
+                                        "example": 150
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lokasi berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Location updated successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    },
+                    "404": {
+                        "description": "Lokasi tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/reports/attendance": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Laporan absensi",
+                "description": "Mendapatkan laporan absensi dengan filter opsional (Admin only)",
+                "operationId": "attendanceReport",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Tanggal mulai (format: Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Tanggal akhir (format: Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-31"
+                        }
+                    },
+                    {
+                        "name": "schedule_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan jadwal",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "email": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "schedule": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "course_name": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "status": {
+                                                        "type": "string"
+                                                    },
+                                                    "distance": {
+                                                        "type": "number"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/reports/attendance/export": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Export laporan ke Excel",
+                "description": "Download laporan absensi dalam format Excel (Admin only)",
+                "operationId": "exportAttendanceExcel",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Tanggal mulai (format: Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Tanggal akhir (format: Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "schedule_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan jadwal",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File Excel berhasil didownload",
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/schedules": {
+            "get": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Daftar semua jadwal",
+                "description": "Mendapatkan semua jadwal dengan detail course dan location (Admin only)",
+                "operationId": "indexSchedules",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "course_id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "location_id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "start_time": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "end_time": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "course": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "course_name": {
+                                                                "type": "string"
+                                                            },
+                                                            "course_code": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "location": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "latitude": {
+                                                                "type": "number"
+                                                            },
+                                                            "longitude": {
+                                                                "type": "number"
+                                                            },
+                                                            "radius": {
+                                                                "type": "number"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Tambah jadwal baru",
+                "description": "Membuat jadwal baru (Admin only)",
+                "operationId": "storeSchedule",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "course_id",
+                                    "location_id",
+                                    "start_time",
+                                    "end_time"
+                                ],
+                                "properties": {
+                                    "course_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "location_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-01-15 08:00:00"
+                                    },
+                                    "end_time": {
+                                        "description": "Harus setelah start_time",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2025-01-15 10:00:00"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Jadwal berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Schedule created successfully"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - Admin only"
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Masukkan token yang didapat dari endpoint login",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Endpoint untuk autentikasi user"
+        },
+        {
+            "name": "Attendance",
+            "description": "Endpoint untuk absensi mahasiswa"
+        },
+        {
+            "name": "Schedules",
+            "description": "Endpoint untuk manajemen jadwal"
+        },
+        {
+            "name": "Locations",
+            "description": "Endpoint untuk manajemen lokasi (Admin only)"
+        },
+        {
+            "name": "Reports",
+            "description": "Endpoint untuk laporan absensi (Admin only)"
+        }
+    ]
+}
