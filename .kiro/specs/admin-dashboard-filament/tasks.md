@@ -64,17 +64,17 @@ Implementasi Admin Dashboard menggunakan Filament v4 untuk sistem absensi mahasi
     - Add navigation badge for count
     - _Requirements: 3.5, 3.6_
 
-- [ ] 5. Create Course Resource
-  - [ ] 5.1 Generate CourseResource
+- [x] 5. Create Course Resource
+  - [x] 5.1 Generate CourseResource
     - Run: php artisan make:filament-resource Course --generate
     - _Requirements: 4.1_
 
-  - [ ] 5.2 Configure Course form schema
+  - [x] 5.2 Configure Course form schema
     - Add course_name, course_code, lecturer_name, location_room
     - Add unique validation for course_code
     - _Requirements: 4.2, 4.6_
 
-  - [ ] 5.3 Configure Course table columns
+  - [x] 5.3 Configure Course table columns
     - Add searchable columns
     - _Requirements: 4.5_
 
