@@ -1,0 +1,116 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use App\Models\Location;
+use App\Models\Course;
+use App\Models\Schedule;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class DatabaseSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // Users - 1 Admin, 2 Mahasiswa
+        $admin = User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@kampus.ac.id',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+        ]);
+
+        $mahasiswa1 = User::create([
+            'name' => 'Budi Santoso',
+            'email' => 'budi@mahasiswa.ac.id',
+            'password' => Hash::make('password'),
+            'role' => 'mahasiswa',
+        ]);
+
+        $mahasiswa2 = User::create([
+            'name' => 'Siti Rahayu',
+            'email' => 'siti@mahasiswa.ac.id',
+            'password' => Hash::make('password'),
+            'role' => 'mahasiswa',
+        ]);
+
+        // Locations - 2 Gedung Kampus
+        $gedungA = Location::create([
+            'name' => 'Gedung A - Fakultas Teknik',
+            'latitude' => -6.200000,
+            'longitude' => 106.816666,
+            'radius' => 100, // 100 meter
+        ]);
+
+        $gedungB = Location::create([
+            'name' => 'Gedung B - Fakultas Ekonomi',
+            'latitude' => -6.201500,
+            'longitude' => 106.818000,
+            'radius' => 150, // 150 meter
+        ]);
+
+        // Courses - 3 Mata Kuliah
+        $course1 = Course::create([
+            'course_name' => 'Pemrograman Web',
+            'course_code' => 'IF101',
+            'lecturer_name' => 'Dr. Ahmad Wijaya',
+            'location_room' => 'Ruang 101',
+        ]);
+
+        $course2 = Course::create([
+            'course_name' => 'Basis Data',
+            'course_code' => 'IF102',
+            'lecturer_name' => 'Prof. Dewi Lestari',
+            'location_room' => 'Ruang 202',
+        ]);
+
+        $course3 = Course::create([
+            'course_name' => 'Ekonomi Digital',
+            'course_code' => 'EK201',
+            'lecturer_name' => 'Dr. Rudi Hartono',
+            'location_room' => 'Ruang 301',
+        ]);
+
+        // Schedules - Jadwal untuk hari ini
+        $today = now()->format('Y-m-d');
+        
+        Schedule::create([
+            'course_id' => $course1->id,
+            'location_id' => $gedungA->id,
+            'start_time' => $today . ' 08:00:00',
+            'end_time' => $today . ' 10:00:00',
+        ]);
+
+        Schedule::create([
+            'course_id' => $course2->id,
+            'location_id' => $gedungA->id,
+            'start_time' => $today . ' 10:30:00',
+            'end_time' => $today . ' 12:30:00',
+        ]);
+
+        Schedule::create([
+            'course_id' => $course3->id,
+            'location_id' => $gedungB->id,
+            'start_time' => $today . ' 13:00:00',
+            'end_time' => $today . ' 15:00:00',
+        ]);
+
+        $this->command->info('Seeding completed!');
+        $this->command->info('');
+        $this->command->info('=== LOGIN CREDENTIALS ===');
+        $this->command->info('Admin: admin@kampus.ac.id / password');
+        $this->command->info('Mahasiswa 1: budi@mahasiswa.ac.id / password');
+        $this->command->info('Mahasiswa 2: siti@mahasiswa.ac.id / password');
+        $this->command->info('');
+        $this->command->info('=== LOCATIONS ===');
+        $this->command->info("Gedung A: lat={$gedungA->latitude}, lon={$gedungA->longitude}, radius={$gedungA->radius}m");
+        $this->command->info("Gedung B: lat={$gedungB->latitude}, lon={$gedungB->longitude}, radius={$gedungB->radius}m");
+    }
+}
