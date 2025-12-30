@@ -78,17 +78,17 @@ Implementasi Admin Dashboard menggunakan Filament v4 untuk sistem absensi mahasi
     - Add searchable columns
     - _Requirements: 4.5_
 
-- [ ] 6. Create Schedule Resource
-  - [ ] 6.1 Generate ScheduleResource
+- [x] 6. Create Schedule Resource
+  - [x] 6.1 Generate ScheduleResource
     - Run: php artisan make:filament-resource Schedule --generate
     - _Requirements: 5.1_
 
-  - [ ] 6.2 Configure Schedule form schema
+  - [x] 6.2 Configure Schedule form schema
     - Add course_id, location_id relationships
     - Add start_time, end_time with validation
     - _Requirements: 5.2, 5.3_
 
-  - [ ] 6.3 Configure Schedule table columns
+  - [x] 6.3 Configure Schedule table columns
     - Add relationship columns
     - Add course and location filters
     - _Requirements: 5.6, 5.7_
