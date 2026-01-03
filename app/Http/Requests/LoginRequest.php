@@ -22,7 +22,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
+            'identity_number' => 'required|string',
             'password' => 'required|string',
         ];
     }
@@ -35,8 +35,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email is required',
-            'email.email' => 'Email must be a valid email address',
+            'identity_number.required' => 'NIM/NIP is required',
+            'identity_number.number' => 'NIM/NIP must be a valid number',
             'password.required' => 'Password is required',
         ];
     }

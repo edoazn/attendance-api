@@ -1,59 +1,172 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Absensi Mahasiswa Geolocation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem absensi mahasiswa berbasis geolocation menggunakan Laravel 12. Mahasiswa dapat melakukan absensi dengan validasi lokasi GPS, dan admin dapat mengelola data melalui dashboard Filament.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **API REST v1** - Endpoint untuk mobile app
+- **Geolocation Validation** - Validasi lokasi menggunakan Haversine Formula
+- **Admin Dashboard** - Filament v4 untuk manajemen data
+- **Swagger Documentation** - Interactive API docs
+- **Excel Export** - Download laporan absensi
+- **Soft Deletes** - Data tidak hilang permanen
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Laravel 12
+- PHP 8.2+
+- MySQL
+- Filament v4
+- Laravel Sanctum (Authentication)
+- L5-Swagger (API Documentation)
+- Maatwebsite Excel (Export)
 
-## Learning Laravel
+## Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+# Clone repository
+git clone https://github.com/edoazn/attendance-api.git
+cd attendance-api
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# Install dependencies
+composer install
 
-## Laravel Sponsors
+# Copy environment file
+cp .env.example .env
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Generate app key
+php artisan key:generate
 
-### Premium Partners
+# Configure database in .env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=absensi_mhs
+DB_USERNAME=root
+DB_PASSWORD=
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# Run migrations and seeders
+php artisan migrate --seed
 
-## Contributing
+# Generate Swagger docs
+php artisan l5-swagger:generate
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Start server
+php artisan serve
+```
 
-## Code of Conduct
+## Default Accounts
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@kampus.ac.id | password |
+| Mahasiswa | budi@mahasiswa.ac.id | password |
+| Mahasiswa | siti@mahasiswa.ac.id | password |
 
-## Security Vulnerabilities
+## API Endpoints
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Base URL: `/api/v1`
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/login` | Login dan dapatkan token |
+| POST | `/logout` | Logout (hapus token) |
+
+### Mahasiswa
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/schedules/today` | Jadwal hari ini |
+| POST | `/attendance` | Submit absensi |
+| GET | `/attendance/history` | Riwayat absensi |
+
+### Admin Only
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/locations` | Daftar lokasi |
+| POST | `/locations` | Tambah lokasi |
+| PUT | `/locations/{id}` | Update lokasi |
+| GET | `/schedules` | Daftar jadwal |
+| POST | `/schedules` | Tambah jadwal |
+| GET | `/reports/attendance` | Laporan absensi |
+| GET | `/reports/attendance/export` | Export Excel |
+
+## API Documentation
+
+Swagger UI tersedia di: `/api/documentation`
+
+## Admin Dashboard
+
+Filament dashboard tersedia di: `/admin`
+
+Login dengan akun admin untuk mengakses:
+- Manajemen Users
+- Manajemen Locations
+- Manajemen Courses
+- Manajemen Schedules
+- View Attendance Records
+- Dashboard Statistics
+
+## Attendance Flow
+
+1. Mahasiswa login via mobile app
+2. Lihat jadwal hari ini (`GET /schedules/today`)
+3. Submit absensi dengan koordinat GPS (`POST /attendance`)
+4. Sistem validasi:
+   - Waktu dalam jadwal (±5 menit toleransi)
+   - Lokasi dalam radius
+5. Status: `hadir` (dalam radius) atau `ditolak` (di luar radius)
+6. Jika ditolak, bisa retry unlimited sampai berhasil
+
+## Geolocation
+
+Sistem menggunakan **Haversine Formula** untuk menghitung jarak antara koordinat user dan lokasi absensi.
+
+```
+Radius default: 100 meter
+Toleransi waktu: ±5 menit dari jadwal
+```
+
+## Testing
+
+```bash
+# Run all tests
+php artisan test
+
+# Run property tests only
+php artisan test --filter=Property
+```
+
+47 property-based tests untuk memastikan sistem berjalan dengan benar.
+
+## Project Structure
+
+```
+app/
+├── Filament/           # Admin dashboard resources
+├── Http/
+│   ├── Controllers/    # API controllers
+│   ├── Middleware/     # Custom middleware
+│   └── Requests/       # Form requests
+├── Models/             # Eloquent models
+├── Services/           # Business logic
+│   ├── AttendanceService.php
+│   ├── GeolocationService.php
+│   └── ReportService.php
+└── Exports/            # Excel exports
+```
+
+## Environment Variables
+
+```env
+APP_TIMEZONE=Asia/Jakarta
+
+DB_CONNECTION=mysql
+DB_DATABASE=absensi_mhs
+
+L5_SWAGGER_GENERATE_ALWAYS=true
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT License

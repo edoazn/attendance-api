@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Location;
 use App\Models\Course;
+use App\Models\Location;
 use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         // Users - 1 Admin, 2 Mahasiswa
         $admin = User::create([
             'name' => 'Admin User',
+            'identity_number' => '12345678',
             'email' => 'admin@kampus.ac.id',
             'password' => Hash::make('password'),
             'role' => 'admin',
@@ -29,6 +30,7 @@ class DatabaseSeeder extends Seeder
 
         $mahasiswa1 = User::create([
             'name' => 'Budi Santoso',
+            'identity_number' => '211420108',
             'email' => 'budi@mahasiswa.ac.id',
             'password' => Hash::make('password'),
             'role' => 'mahasiswa',
@@ -36,6 +38,7 @@ class DatabaseSeeder extends Seeder
 
         $mahasiswa2 = User::create([
             'name' => 'Siti Rahayu',
+            'identity_number' => '211420109',
             'email' => 'siti@mahasiswa.ac.id',
             'password' => Hash::make('password'),
             'role' => 'mahasiswa',
@@ -80,7 +83,7 @@ class DatabaseSeeder extends Seeder
 
         // Schedules - Jadwal untuk hari ini
         $today = now()->format('Y-m-d');
-        
+
         Schedule::create([
             'course_id' => $course1->id,
             'location_id' => $gedungA->id,
@@ -113,9 +116,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Seeding completed!');
         $this->command->info('');
         $this->command->info('=== LOGIN CREDENTIALS ===');
-        $this->command->info('Admin: admin@kampus.ac.id / password');
-        $this->command->info('Mahasiswa 1: budi@mahasiswa.ac.id / password');
-        $this->command->info('Mahasiswa 2: siti@mahasiswa.ac.id / password');
+        $this->command->info('Admin: 12345678 / password');
+        $this->command->info('Mahasiswa 1: 211420108 / password');
+        $this->command->info('Mahasiswa 2: 211420109 / password');
         $this->command->info('');
         $this->command->info('=== LOCATIONS ===');
         $this->command->info("Gedung A: lat={$gedungA->latitude}, lon={$gedungA->longitude}, radius={$gedungA->radius}m");
