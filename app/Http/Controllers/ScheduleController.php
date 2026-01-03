@@ -12,7 +12,7 @@ class ScheduleController extends Controller
      * @OA\Get(
      *     path="/schedules",
      *     summary="Daftar semua jadwal",
-     *     description="Mendapatkan semua jadwal dengan detail course dan location (Admin only)",
+     *     description="Mendapatkan semua jadwal dengan detail class, course dan location (Admin only)",
      *     operationId="indexSchedules",
      *     tags={"Schedules"},
      *     security={{"bearerAuth":{}}},
@@ -23,10 +23,16 @@ class ScheduleController extends Controller
      *             @OA\Property(property="data", type="array",
      *                 @OA\Items(
      *                     @OA\Property(property="id", type="integer"),
+     *                     @OA\Property(property="class_id", type="integer"),
      *                     @OA\Property(property="course_id", type="integer"),
      *                     @OA\Property(property="location_id", type="integer"),
      *                     @OA\Property(property="start_time", type="string", format="date-time"),
      *                     @OA\Property(property="end_time", type="string", format="date-time"),
+     *                     @OA\Property(property="class_room", type="object",
+     *                         @OA\Property(property="id", type="integer"),
+     *                         @OA\Property(property="name", type="string", example="TI-2A"),
+     *                         @OA\Property(property="academic_year", type="string", example="2024/2025")
+     *                     ),
      *                     @OA\Property(property="course", type="object",
      *                         @OA\Property(property="id", type="integer"),
      *                         @OA\Property(property="course_name", type="string"),
@@ -49,7 +55,7 @@ class ScheduleController extends Controller
      */
     public function index(): JsonResponse
     {
-        $schedules = Schedule::with(['course', 'location'])->get();
+        $schedules = Schedule::with(['classRoom', 'course', 'location'])->get();
 
         return response()->json([
             'data' => $schedules
@@ -60,16 +66,17 @@ class ScheduleController extends Controller
      * @OA\Post(
      *     path="/schedules",
      *     summary="Tambah jadwal baru",
-     *     description="Membuat jadwal baru (Admin only)",
+     *     description="Membuat jadwal baru untuk kelas tertentu (Admin only)",
      *     operationId="storeSchedule",
      *     tags={"Schedules"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"course_id","location_id","start_time","end_time"},
-     *             @OA\Property(property="course_id", type="integer", example=1),
-     *             @OA\Property(property="location_id", type="integer", example=1),
+     *             required={"class_id","course_id","location_id","start_time","end_time"},
+     *             @OA\Property(property="class_id", type="integer", example=1, description="ID kelas"),
+     *             @OA\Property(property="course_id", type="integer", example=1, description="ID mata kuliah"),
+     *             @OA\Property(property="location_id", type="integer", example=1, description="ID lokasi"),
      *             @OA\Property(property="start_time", type="string", format="date-time", example="2025-01-15 08:00:00"),
      *             @OA\Property(property="end_time", type="string", format="date-time", example="2025-01-15 10:00:00", description="Harus setelah start_time")
      *         )
@@ -90,13 +97,14 @@ class ScheduleController extends Controller
     public function store(ScheduleRequest $request): JsonResponse
     {
         $schedule = Schedule::create([
+            'class_id' => $request->class_id,
             'course_id' => $request->course_id,
             'location_id' => $request->location_id,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
         ]);
 
-        $schedule->load(['course', 'location']);
+        $schedule->load(['classRoom', 'course', 'location']);
 
         return response()->json([
             'message' => 'Schedule created successfully',

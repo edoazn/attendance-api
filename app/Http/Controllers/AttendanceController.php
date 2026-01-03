@@ -161,7 +161,7 @@ class AttendanceController extends Controller
      * @OA\Get(
      *     path="/schedules/today",
      *     summary="Jadwal hari ini",
-     *     description="Mendapatkan daftar jadwal untuk hari ini",
+     *     description="Mendapatkan daftar jadwal untuk hari ini berdasarkan kelas user",
      *     operationId="todaySchedules",
      *     tags={"Schedules"},
      *     security={{"bearerAuth":{}}},
@@ -172,6 +172,7 @@ class AttendanceController extends Controller
      *             @OA\Property(property="data", type="array",
      *                 @OA\Items(
      *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="class_name", type="string", example="TI-2A"),
      *                     @OA\Property(property="course_name", type="string", example="Pemrograman Web"),
      *                     @OA\Property(property="location_name", type="string", example="Gedung A - Fakultas Teknik"),
      *                     @OA\Property(property="start_time", type="string", format="date-time"),
@@ -183,13 +184,14 @@ class AttendanceController extends Controller
      *     @OA\Response(response=401, description="Unauthorized")
      * )
      */
-    public function todaySchedules(): JsonResponse
+    public function todaySchedules(Request $request): JsonResponse
     {
-        $schedules = $this->attendanceService->getTodaySchedules();
+        $schedules = $this->attendanceService->getTodaySchedules($request->user());
 
         $data = $schedules->map(function ($schedule) {
             return [
                 'id' => $schedule->id,
+                'class_name' => $schedule->classRoom->name,
                 'course_name' => $schedule->course->course_name,
                 'location_name' => $schedule->location->name,
                 'start_time' => $schedule->start_time,

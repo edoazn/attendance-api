@@ -13,6 +13,7 @@ class Schedule extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'class_id',
         'course_id',
         'location_id',
         'start_time',
@@ -27,6 +28,11 @@ class Schedule extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function classRoom(): BelongsTo
+    {
+        return $this->belongsTo(ClassRoom::class, 'class_id');
     }
 
     public function location(): BelongsTo

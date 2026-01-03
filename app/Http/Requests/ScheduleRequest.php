@@ -22,6 +22,7 @@ class ScheduleRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'class_id' => 'required|exists:classes,id',
             'course_id' => 'required|exists:courses,id',
             'location_id' => 'required|exists:locations,id',
             'start_time' => 'required|date',
@@ -37,6 +38,8 @@ class ScheduleRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'class_id.required' => 'Class ID is required',
+            'class_id.exists' => 'Class not found',
             'course_id.required' => 'Course ID is required',
             'course_id.exists' => 'Course not found',
             'location_id.required' => 'Location ID is required',

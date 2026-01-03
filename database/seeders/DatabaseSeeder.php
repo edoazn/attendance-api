@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ClassRoom;
 use App\Models\Course;
 use App\Models\Location;
 use App\Models\Schedule;
@@ -81,10 +82,25 @@ class DatabaseSeeder extends Seeder
             'location_room' => 'Ruang 301',
         ]);
 
+        // Classes - Kelas
+        $kelasTI2A = ClassRoom::create([
+            'name' => 'TI-2A',
+            'academic_year' => '2024/2025',
+        ]);
+
+        $kelasTI2B = ClassRoom::create([
+            'name' => 'TI-2B',
+            'academic_year' => '2024/2025',
+        ]);
+
+        // Assign mahasiswa ke kelas
+        $kelasTI2A->users()->attach([$mahasiswa1->id, $mahasiswa2->id]);
+
         // Schedules - Jadwal untuk hari ini
         $today = now()->format('Y-m-d');
 
         Schedule::create([
+            'class_id' => $kelasTI2A->id,
             'course_id' => $course1->id,
             'location_id' => $gedungA->id,
             'start_time' => "{$today} 08:00:00",
@@ -92,6 +108,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Schedule::create([
+            'class_id' => $kelasTI2A->id,
             'course_id' => $course2->id,
             'location_id' => $gedungA->id,
             'start_time' => "{$today} 10:30:00",
@@ -99,6 +116,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Schedule::create([
+            'class_id' => $kelasTI2B->id,
             'course_id' => $course3->id,
             'location_id' => $gedungB->id,
             'start_time' => "{$today} 13:00:00",
@@ -107,6 +125,7 @@ class DatabaseSeeder extends Seeder
 
         // Schedule untuk testing - aktif sepanjang hari
         Schedule::create([
+            'class_id' => $kelasTI2A->id,
             'course_id' => $course1->id,
             'location_id' => $gedungA->id,
             'start_time' => "{$today} 00:00:00",

@@ -31,6 +31,16 @@ class AttendanceService
     ): array {
         $schedule = Schedule::with('location')->findOrFail($scheduleId);
 
+        // Validate user belongs to the class
+        if (!$this->validateUserClass($user, $schedule)) {
+            return [
+                'success' => false,
+                'status' => null,
+                'distance' => null,
+                'message' => 'Anda tidak terdaftar di kelas ini',
+            ];
+        }
+
         // Validate schedule time
         if (!$this->validateScheduleTime($schedule)) {
             return [
@@ -86,6 +96,18 @@ class AttendanceService
     }
 
     /**
+     * Validate if user belongs to the schedule's class
+     *
+     * @param User $user
+     * @param Schedule $schedule
+     * @return bool
+     */
+    private function validateUserClass(User $user, Schedule $schedule): bool
+    {
+        return $user->classes()->where('classes.id', $schedule->class_id)->exists();
+    }
+
+    /**
      * Validate if current time is within schedule time range
      *
      * @param Schedule $schedule
@@ -128,15 +150,18 @@ class AttendanceService
     }
 
     /**
-     * Get today's schedules with course and location details
+     * Get today's schedules for user's classes
      *
+     * @param User $user
      * @return Collection
      */
-    public function getTodaySchedules(): Collection
+    public function getTodaySchedules(User $user): Collection
     {
         $today = Carbon::today();
+        $userClassIds = $user->classes()->pluck('classes.id');
         
-        return Schedule::with(['course', 'location'])
+        return Schedule::with(['classRoom', 'course', 'location'])
+            ->whereIn('class_id', $userClassIds)
             ->whereDate('start_time', $today)
             ->orderBy('start_time', 'asc')
             ->get();
