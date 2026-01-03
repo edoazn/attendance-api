@@ -17,10 +17,14 @@ class UserForm
                     ->label('Nama')
                     ->required()
                     ->maxLength(255),
+                TextInput::make('identity_number')
+                    ->label('NIM/NIP')
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
                 TextInput::make('email')
                     ->label('Alamat Email')
                     ->email()
-                    ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Select::make('role')
@@ -31,6 +35,12 @@ class UserForm
                     ])
                     ->default('mahasiswa')
                     ->required(),
+                Select::make('classes')
+                    ->label('Kelas')
+                    ->relationship('classes', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('password')
                     ->label('Kata Sandi')
                     ->password()

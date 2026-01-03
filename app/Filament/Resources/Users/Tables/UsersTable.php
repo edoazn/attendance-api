@@ -19,10 +19,15 @@ class UsersTable
                     ->label('Nama')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('email')
-                    ->label('Alamat Email')
+                TextColumn::make('identity_number')
+                    ->label('NIM/NIP')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('role')
                     ->label('Peran')
                     ->badge()
@@ -31,10 +36,15 @@ class UsersTable
                         'mahasiswa' => 'success',
                         default => 'gray',
                     }),
+                TextColumn::make('classes.name')
+                    ->label('Kelas')
+                    ->badge()
+                    ->separator(', '),
                 TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('role')
@@ -43,6 +53,11 @@ class UsersTable
                         'admin' => 'Admin',
                         'mahasiswa' => 'Mahasiswa',
                     ]),
+                SelectFilter::make('classes')
+                    ->label('Kelas')
+                    ->relationship('classes', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),

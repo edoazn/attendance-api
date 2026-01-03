@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\Schedules\Schemas;
 
-use App\Models\Course;
-use App\Models\Location;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
@@ -14,6 +12,12 @@ class ScheduleForm
     {
         return $schema
             ->components([
+                Select::make('class_id')
+                    ->label('Kelas')
+                    ->relationship('classRoom', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 Select::make('course_id')
                     ->label('Mata Kuliah')
                     ->relationship('course', 'course_name')

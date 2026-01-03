@@ -15,6 +15,10 @@ class SchedulesTable
     {
         return $table
             ->columns([
+                TextColumn::make('classRoom.name')
+                    ->label('Kelas')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('course.course_name')
                     ->label('Mata Kuliah')
                     ->searchable()
@@ -43,6 +47,11 @@ class SchedulesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('class_id')
+                    ->label('Kelas')
+                    ->relationship('classRoom', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('course_id')
                     ->label('Mata Kuliah')
                     ->relationship('course', 'course_name')
