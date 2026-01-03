@@ -19,6 +19,7 @@ Route::prefix('v1')->group(function () {
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/profile', [AuthController::class, 'profile']);
 
         // Attendance routes (Mahasiswa) with rate limiting
         Route::post('/attendance', [AttendanceController::class, 'store'])

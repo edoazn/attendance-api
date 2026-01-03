@@ -250,7 +250,7 @@
                     "Schedules"
                 ],
                 "summary": "Jadwal hari ini",
-                "description": "Mendapatkan daftar jadwal untuk hari ini",
+                "description": "Mendapatkan daftar jadwal untuk hari ini berdasarkan kelas user",
                 "operationId": "todaySchedules",
                 "responses": {
                     "200": {
@@ -266,6 +266,10 @@
                                                     "id": {
                                                         "type": "integer",
                                                         "example": 1
+                                                    },
+                                                    "class_name": {
+                                                        "type": "string",
+                                                        "example": "TI-2A"
                                                     },
                                                     "course_name": {
                                                         "type": "string",
@@ -318,14 +322,14 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "email",
+                                    "identity_number",
                                     "password"
                                 ],
                                 "properties": {
-                                    "email": {
+                                    "identity_number": {
                                         "type": "string",
-                                        "format": "email",
-                                        "example": "budi@mahasiswa.ac.id"
+                                        "format": "string",
+                                        "example": "12345678"
                                     },
                                     "password": {
                                         "type": "string",
@@ -358,6 +362,10 @@
                                                 "name": {
                                                     "type": "string",
                                                     "example": "Budi Santoso"
+                                                },
+                                                "identity_number": {
+                                                    "type": "string",
+                                                    "example": "12345678"
                                                 },
                                                 "email": {
                                                     "type": "string",
@@ -416,6 +424,79 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/profile": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get user profile",
+                "description": "Mendapatkan data profil user yang sedang login beserta kelas yang diikuti",
+                "operationId": "profile",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mendapatkan profil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Budi Santoso"
+                                        },
+                                        "identity_number": {
+                                            "type": "string",
+                                            "example": "211420108"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "budi@mahasiswa.ac.id",
+                                            "nullable": true
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "mahasiswa"
+                                        },
+                                        "classes": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "TI-2A"
+                                                    },
+                                                    "academic_year": {
+                                                        "type": "string",
+                                                        "example": "2024/2025"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -850,7 +931,7 @@
                     "Schedules"
                 ],
                 "summary": "Daftar semua jadwal",
-                "description": "Mendapatkan semua jadwal dengan detail course dan location (Admin only)",
+                "description": "Mendapatkan semua jadwal dengan detail class, course dan location (Admin only)",
                 "operationId": "indexSchedules",
                 "responses": {
                     "200": {
@@ -866,6 +947,9 @@
                                                     "id": {
                                                         "type": "integer"
                                                     },
+                                                    "class_id": {
+                                                        "type": "integer"
+                                                    },
                                                     "course_id": {
                                                         "type": "integer"
                                                     },
@@ -879,6 +963,22 @@
                                                     "end_time": {
                                                         "type": "string",
                                                         "format": "date-time"
+                                                    },
+                                                    "class_room": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "TI-2A"
+                                                            },
+                                                            "academic_year": {
+                                                                "type": "string",
+                                                                "example": "2024/2025"
+                                                            }
+                                                        },
+                                                        "type": "object"
                                                     },
                                                     "course": {
                                                         "properties": {
@@ -942,7 +1042,7 @@
                     "Schedules"
                 ],
                 "summary": "Tambah jadwal baru",
-                "description": "Membuat jadwal baru (Admin only)",
+                "description": "Membuat jadwal baru untuk kelas tertentu (Admin only)",
                 "operationId": "storeSchedule",
                 "requestBody": {
                     "required": true,
@@ -950,17 +1050,25 @@
                         "application/json": {
                             "schema": {
                                 "required": [
+                                    "class_id",
                                     "course_id",
                                     "location_id",
                                     "start_time",
                                     "end_time"
                                 ],
                                 "properties": {
+                                    "class_id": {
+                                        "description": "ID kelas",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
                                     "course_id": {
+                                        "description": "ID mata kuliah",
                                         "type": "integer",
                                         "example": 1
                                     },
                                     "location_id": {
+                                        "description": "ID lokasi",
                                         "type": "integer",
                                         "example": 1
                                     },
