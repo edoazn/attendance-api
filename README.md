@@ -6,6 +6,7 @@ Sistem absensi mahasiswa berbasis geolocation menggunakan Laravel 12. Mahasiswa 
 
 - **API REST v1** - Endpoint untuk mobile app
 - **Geolocation Validation** - Validasi lokasi menggunakan Haversine Formula
+- **Class Management** - Pengelolaan kelas dan penugasan mahasiswa per kelas
 - **Admin Dashboard** - Filament v4 untuk manajemen data
 - **Swagger Documentation** - Interactive API docs
 - **Excel Export** - Download laporan absensi
@@ -101,6 +102,7 @@ Filament dashboard tersedia di: `/admin`
 
 Login dengan akun admin untuk mengakses:
 - Manajemen Users
+- Manajemen Classes (Kelas)
 - Manajemen Locations
 - Manajemen Courses
 - Manajemen Schedules
@@ -144,11 +146,25 @@ php artisan test --filter=Property
 ```
 app/
 ├── Filament/           # Admin dashboard resources
+│   ├── Resources/
+│   │   ├── Attendances/
+│   │   ├── ClassRooms/     # Manajemen kelas
+│   │   ├── Courses/
+│   │   ├── Locations/
+│   │   ├── Schedules/
+│   │   └── Users/
+│   └── Widgets/        # Dashboard widgets
 ├── Http/
 │   ├── Controllers/    # API controllers
 │   ├── Middleware/     # Custom middleware
 │   └── Requests/       # Form requests
 ├── Models/             # Eloquent models
+│   ├── Attendance.php
+│   ├── ClassRoom.php   # Model kelas
+│   ├── Course.php
+│   ├── Location.php
+│   ├── Schedule.php
+│   └── User.php
 ├── Services/           # Business logic
 │   ├── AttendanceService.php
 │   ├── GeolocationService.php

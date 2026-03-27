@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LocationRequest;
+use App\Http\Resources\LocationResource;
+use App\Http\Traits\ApiResponse;
 use App\Models\Location;
 use Illuminate\Http\JsonResponse;
 
 class LocationController extends Controller
 {
+    use ApiResponse;
     /**
      * @OA\Get(
      *     path="/locations",
@@ -39,9 +42,7 @@ class LocationController extends Controller
     {
         $locations = Location::all();
 
-        return response()->json([
-            'data' => $locations
-        ]);
+        return $this->collection(LocationResource::collection($locations));
     }
 
     /**
@@ -84,10 +85,7 @@ class LocationController extends Controller
             'radius' => $request->radius,
         ]);
 
-        return response()->json([
-            'message' => 'Location created successfully',
-            'data' => $location
-        ], 201);
+        return $this->resource(new LocationResource($location), 'Location created successfully', 201);
     }
 
     /**

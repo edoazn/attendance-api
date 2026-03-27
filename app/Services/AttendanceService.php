@@ -74,7 +74,7 @@ class AttendanceService
         $status = $isWithinRadius ? 'hadir' : 'ditolak';
 
         // Store attendance record
-        Attendance::create([
+        $attendance = Attendance::create([
             'user_id' => $user->id,
             'schedule_id' => $schedule->id,
             'latitude' => $latitude,
@@ -91,6 +91,7 @@ class AttendanceService
             'success' => true,
             'status' => $status,
             'distance' => round($distance, 2),
+            'attendance' => $attendance,
             'message' => $message,
         ];
     }
@@ -143,7 +144,7 @@ class AttendanceService
      */
     public function getUserHistory(User $user, int $perPage = 15)
     {
-        return Attendance::with(['schedule.course', 'schedule.location'])
+        return Attendance::with(['user', 'schedule.course'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
@@ -159,7 +160,7 @@ class AttendanceService
     {
         $today = Carbon::today();
         $userClassIds = $user->classes()->pluck('classes.id');
-        
+
         return Schedule::with(['classRoom', 'course', 'location'])
             ->whereIn('class_id', $userClassIds)
             ->whereDate('start_time', $today)

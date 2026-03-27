@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AttendanceRequest;
+use App\Http\Resources\AttendanceResource;
+use App\Http\Resources\ScheduleResource;
+use App\Http\Traits\ApiResponse;
 use App\Services\AttendanceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    use ApiResponse;
     public function __construct(
         private AttendanceService $attendanceService
     ) {}
@@ -61,18 +65,18 @@ class AttendanceController extends Controller
         );
 
         if (!$result['success']) {
-            return response()->json([
-                'status' => $result['status'],
-                'distance' => $result['distance'],
-                'message' => $result['message'],
-            ], 422);
+            return $this->error(
+                $result['message'],
+                [],
+                422
+            );
         }
 
-        return response()->json([
+        return $this->success([
             'status' => $result['status'],
             'distance' => $result['distance'],
-            'message' => $result['message'],
-        ]);
+            'attendance' => new AttendanceResource($result['attendance']),
+        ], $result['message'], 200);
     }
 
     /**
@@ -131,30 +135,7 @@ class AttendanceController extends Controller
         $perPage = $request->input('per_page', 15);
         $history = $this->attendanceService->getUserHistory($request->user(), $perPage);
 
-        $data = $history->getCollection()->map(function ($attendance) {
-            return [
-                'id' => $attendance->id,
-                'schedule' => [
-                    'id' => $attendance->schedule->id,
-                    'course_name' => $attendance->schedule->course->course_name,
-                    'start_time' => $attendance->schedule->start_time,
-                    'end_time' => $attendance->schedule->end_time,
-                ],
-                'status' => $attendance->status,
-                'distance' => $attendance->distance,
-                'created_at' => $attendance->created_at,
-            ];
-        });
-
-        return response()->json([
-            'data' => $data,
-            'meta' => [
-                'current_page' => $history->currentPage(),
-                'last_page' => $history->lastPage(),
-                'per_page' => $history->perPage(),
-                'total' => $history->total(),
-            ],
-        ]);
+        return $this->paginated(AttendanceResource::collection($history));
     }
 
     /**
@@ -188,19 +169,6 @@ class AttendanceController extends Controller
     {
         $schedules = $this->attendanceService->getTodaySchedules($request->user());
 
-        $data = $schedules->map(function ($schedule) {
-            return [
-                'id' => $schedule->id,
-                'class_name' => $schedule->classRoom->name,
-                'course_name' => $schedule->course->course_name,
-                'location_name' => $schedule->location->name,
-                'start_time' => $schedule->start_time,
-                'end_time' => $schedule->end_time,
-            ];
-        });
-
-        return response()->json([
-            'data' => $data,
-        ]);
+        return $this->collection(ScheduleResource::collection($schedules));
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
+use App\Http\Traits\ApiResponse;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
     /**
      * @OA\Post(
      *     path="/login",
@@ -67,23 +70,15 @@ class AuthController extends Controller
         $user = User::where('identity_number', $request->identity_number)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials',
-            ], 401);
+            return $this->error('Invalid credentials', [], 401);
         }
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
-        return response()->json([
+        return $this->success([
             'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'identity_number' => $user->identity_number,
-                'email' => $user->email,
-                'role' => $user->role,
-            ],
-        ]);
+            'user' => new UserResource($user),
+        ], 'Login successful', 200);
     }
 
     /**
@@ -118,9 +113,7 @@ class AuthController extends Controller
         // Delete all tokens for the authenticated user
         $user->tokens()->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+        return $this->success(null, 'Logged out successfully');
     }
 
     /**
@@ -164,17 +157,6 @@ class AuthController extends Controller
         $user = $request->user();
         $user->load('classes');
 
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'identity_number' => $user->identity_number,
-            'email' => $user->email,
-            'role' => $user->role,
-            'classes' => $user->classes->map(fn ($class) => [
-                'id' => $class->id,
-                'name' => $class->name,
-                'academic_year' => $class->academic_year,
-            ]),
-        ]);
+        return $this->resource(new UserResource($user));
     }
 }
