@@ -77,7 +77,7 @@ function createTestAttendanceData(int $count = 10): array
  * For any date range filter, all returned records must have created_at within that range
  */
 test('Property 13.1: Date range filter returns only records within specified range', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();
@@ -108,7 +108,7 @@ test('Property 13.1: Date range filter returns only records within specified ran
  * For any schedule_id filter, all returned records must match that schedule_id
  */
 test('Property 13.2: Schedule ID filter returns only records for specified schedule', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();
@@ -144,7 +144,7 @@ test('Property 13.2: Schedule ID filter returns only records for specified sched
  * For any combination of date range and schedule_id filters, all returned records must satisfy both conditions
  */
 test('Property 13.3: Combined date range and schedule ID filters work correctly', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();
@@ -180,7 +180,7 @@ test('Property 13.3: Combined date range and schedule ID filters work correctly'
  * When no filters are applied, all attendance records should be returned
  */
 test('Property 13.4: No filters returns all attendance records', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();

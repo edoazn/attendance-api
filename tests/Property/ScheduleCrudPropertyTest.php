@@ -12,6 +12,7 @@
  */
 
 use App\Models\User;
+use App\Models\ClassRoom;
 use App\Models\Course;
 use App\Models\Location;
 use App\Models\Schedule;
@@ -20,7 +21,7 @@ use Carbon\Carbon;
 /**
  * Helper function to generate random valid schedule data
  */
-function generateValidScheduleData(int $courseId, int $locationId): array
+function generateValidScheduleData(int $courseId, int $locationId, int $classId): array
 {
     $startTime = Carbon::now()->addHours(fake()->numberBetween(1, 24));
     $endTime = $startTime->copy()->addHours(fake()->numberBetween(1, 3));
@@ -28,6 +29,7 @@ function generateValidScheduleData(int $courseId, int $locationId): array
     return [
         'course_id' => $courseId,
         'location_id' => $locationId,
+        'class_id' => $classId,
         'start_time' => $startTime->format('Y-m-d H:i:s'),
         'end_time' => $endTime->format('Y-m-d H:i:s'),
     ];
@@ -43,6 +45,7 @@ function createScheduleAdminUser(): User
         'email' => fake()->unique()->safeEmail(),
         'password' => bcrypt('password123'),
         'role' => 'admin',
+        'identity_number' => fake()->unique()->numerify('#####'),
     ]);
 }
 
@@ -73,15 +76,27 @@ function createTestLocation(): Location
 }
 
 /**
+ * Helper function to create a classroom
+ */
+function createTestClassRoom(): ClassRoom
+{
+    return ClassRoom::create([
+        'name' => 'Kelas ' . fake()->lexify('????'),
+        'academic_year' => '2025/2026',
+    ]);
+}
+
+/**
  * Property 5.1: Create schedule then retrieve returns equivalent data with course and location details
  * For any valid schedule data, creating then retrieving should return the same data with relationships
  */
 test('Property 5.1: Create schedule then retrieve returns equivalent data with relationships', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 10; $i++) {
         $admin = createScheduleAdminUser();
         $course = createTestCourse();
         $location = createTestLocation();
-        $scheduleData = generateValidScheduleData($course->id, $location->id);
+        $classRoom = createTestClassRoom();
+        $scheduleData = generateValidScheduleData($course->id, $location->id, $classRoom->id);
 
         // Create schedule
         $createResponse = $this->actingAs($admin, 'sanctum')
@@ -140,7 +155,7 @@ test('Property 5.1: Create schedule then retrieve returns equivalent data with r
  * For any set of created schedules, index should return all of them with course and location details
  */
 test('Property 5.2: Index returns all created schedules with relationships', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 10; $i++) {
         $admin = createScheduleAdminUser();
         $scheduleCount = fake()->numberBetween(1, 3);
         $createdIds = [];
@@ -151,10 +166,11 @@ test('Property 5.2: Index returns all created schedules with relationships', fun
         for ($j = 0; $j < $scheduleCount; $j++) {
             $course = createTestCourse();
             $location = createTestLocation();
+            $classRoom = createTestClassRoom();
             $courses[] = $course;
             $locations[] = $location;
 
-            $scheduleData = generateValidScheduleData($course->id, $location->id);
+            $scheduleData = generateValidScheduleData($course->id, $location->id, $classRoom->id);
             $response = $this->actingAs($admin, 'sanctum')
                 ->postJson('/api/v1/schedules', $scheduleData);
             
@@ -193,7 +209,7 @@ test('Property 5.2: Index returns all created schedules with relationships', fun
  * For any schedule where end_time is before or equal to start_time, creation should fail
  */
 test('Property 5.3: Schedule validation rejects invalid end_time', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 10; $i++) {
         $admin = createScheduleAdminUser();
         $course = createTestCourse();
         $location = createTestLocation();

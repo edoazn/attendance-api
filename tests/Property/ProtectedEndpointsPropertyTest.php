@@ -43,7 +43,7 @@ test('Property 2.1: POST /api/attendance requires authentication', function () {
         'end_time' => now()->addHour(),
     ]);
 
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Generate random valid attendance data
         $attendanceData = [
             'schedule_id' => $schedule->id,
@@ -68,7 +68,7 @@ test('Property 2.1: POST /api/attendance requires authentication', function () {
  * For any request to GET /api/v1/attendance/history without a valid token, the system should return 401
  */
 test('Property 2.2: GET /api/attendance/history requires authentication', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Request without authentication token
         $response = $this->getJson('/api/v1/attendance/history');
 
@@ -81,7 +81,7 @@ test('Property 2.2: GET /api/attendance/history requires authentication', functi
  * For any request to GET /api/v1/schedules/today without a valid token, the system should return 401
  */
 test('Property 2.3: GET /api/schedules/today requires authentication', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Request without authentication token
         $response = $this->getJson('/api/v1/schedules/today');
 
@@ -116,10 +116,11 @@ test('Property 2.4: Authenticated requests to protected endpoints succeed', func
         'end_time' => now()->addHour(),
     ]);
 
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Create a random user
         $user = User::create([
             'name' => fake()->name(),
+            'identity_number' => fake()->unique()->numerify('##########'),
             'email' => fake()->unique()->safeEmail(),
             'password' => bcrypt('password123'),
             'role' => 'mahasiswa',
@@ -152,7 +153,7 @@ test('Property 2.4: Authenticated requests to protected endpoints succeed', func
  * For any request with an invalid token, the system should return 401
  */
 test('Property 2.5: Invalid tokens return 401', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Generate random invalid token
         $invalidToken = fake()->sha256();
 

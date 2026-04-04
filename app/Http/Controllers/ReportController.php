@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\AttendanceExport;
 use App\Http\Requests\ReportRequest;
+use App\Http\Resources\AttendanceResource;
+use App\Http\Traits\ApiResponse;
 use App\Services\ReportService;
 use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
@@ -11,6 +13,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportController extends Controller
 {
+    use ApiResponse;
+
     public function __construct(
         private ReportService $reportService
     ) {}
@@ -79,27 +83,7 @@ class ReportController extends Controller
             $request->schedule_id
         );
 
-        $data = $attendances->map(function ($attendance) {
-            return [
-                'id' => $attendance->id,
-                'user' => [
-                    'id' => $attendance->user->id,
-                    'name' => $attendance->user->name,
-                    'email' => $attendance->user->email,
-                ],
-                'schedule' => [
-                    'id' => $attendance->schedule->id,
-                    'course_name' => $attendance->schedule->course->course_name,
-                ],
-                'status' => $attendance->status,
-                'distance' => $attendance->distance,
-                'created_at' => $attendance->created_at,
-            ];
-        });
-
-        return response()->json([
-            'data' => $data,
-        ]);
+        return $this->collection(AttendanceResource::collection($attendances));
     }
 
     /**

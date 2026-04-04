@@ -138,9 +138,6 @@ class LocationController extends Controller
             'radius' => $request->radius,
         ]);
 
-        return response()->json([
-            'message' => 'Location updated successfully',
-            'data' => $location
-        ]);
+        return $this->resource(new LocationResource($location), 'Location updated successfully');
     }
 }

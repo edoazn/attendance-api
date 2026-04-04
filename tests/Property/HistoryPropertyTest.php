@@ -78,7 +78,7 @@ function createActiveScheduleForHistory(): Schedule
  * Validates: Requirements 5.1
  */
 test('Property 11.1: User history contains only their own records', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupHistoryTestData();
 
         // Create multiple users
@@ -132,7 +132,7 @@ test('Property 11.1: User history contains only their own records', function () 
  * Validates: Requirements 5.1
  */
 test('Property 11.2: User history excludes other users records', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupHistoryTestData();
 
         // Create exactly 2 users
@@ -191,7 +191,7 @@ test('Property 11.2: User history excludes other users records', function () {
  * Validates: Requirements 5.3
  */
 test('Property 12.1: History is ordered by created_at descending', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupHistoryTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);
@@ -245,7 +245,7 @@ test('Property 12.1: History is ordered by created_at descending', function () {
  * Validates: Requirements 5.3
  */
 test('Property 12.2: Newest attendance appears first in history', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupHistoryTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);

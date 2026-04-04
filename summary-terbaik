@@ -1,0 +1,115 @@
+# 📋 Rangkuman Project: Sistem Absensi Mahasiswa Geolocation
+
+## Apa Ini?
+
+Backend API (Laravel 12) untuk **sistem absensi mahasiswa berbasis GPS**. Mahasiswa absen lewat mobile app, sistem validasi lokasi pakai **Haversine Formula** (radius default 100 meter, toleransi waktu ±5 menit).
+
+## Tech Stack
+
+| Layer | Teknologi |
+|-------|-----------|
+| Backend | Laravel 12, PHP 8.2+ |
+| Auth | Laravel Sanctum (token-based) |
+| Database | MySQL (pakai SQLite untuk testing) |
+| Admin Panel | Filament v4 |
+| API Docs | L5-Swagger |
+| Export | Maatwebsite Excel |
+
+## Arsitektur Utama
+
+```mermaid
+graph TD
+    A["Mobile App (Flutter)"] -->|REST API v1| B[Laravel Controllers]
+    B --> C[Services Layer]
+    C --> D[Models / Eloquent]
+    D --> E[(MySQL)]
+    F[Filament Admin] --> D
+    C --> G[GeolocationService<br/>Haversine Formula]
+```
+
+## Model & Relasi
+
+```mermaid
+erDiagram
+    User }o--o{ ClassRoom : "belongs to many (pivot: class_user)"
+    User ||--o{ Attendance : "has many"
+    ClassRoom ||--o{ Schedule : "has many"
+    Course ||--o{ Schedule : "has many"
+    Location ||--o{ Schedule : "has many"
+    Schedule ||--o{ Attendance : "has many"
+```
+
+**6 Models:** [User](file:///d:/applications/Laravel%20projects/absensi-mhs/app/Models/User.php#16-84), `ClassRoom`, `Course`, `Location`, [Schedule](file:///d:/applications/Laravel%20projects/absensi-mhs/app/Models/Schedule.php#11-58), [Attendance](file:///d:/applications/Laravel%20projects/absensi-mhs/app/Models/Attendance.php#9-38)
+
+## API Endpoints (prefix: `/api/v1`)
+
+| Kategori | Endpoint | Method | Akses |
+|----------|----------|--------|-------|
+| Auth | `/login` | POST | Public |
+| Auth | `/logout` | POST | Auth |
+| Auth | `/profile` | GET | Auth |
+| Mahasiswa | `/schedules/today` | GET | Auth |
+| Mahasiswa | `/attendance` | POST | Auth (rate limited) |
+| Mahasiswa | `/attendance/history` | GET | Auth |
+| Admin | `/locations` | GET/POST | Admin |
+| Admin | `/locations/{id}` | PUT | Admin |
+| Admin | `/schedules` | GET/POST | Admin |
+| Admin | `/reports/attendance` | GET | Admin |
+| Admin | `/reports/attendance/export` | GET | Admin |
+
+## Flow Absensi
+
+1. Mahasiswa login → dapat token Sanctum
+2. Hit `GET /schedules/today` → lihat jadwal hari ini (berdasarkan kelas)
+3. Hit `POST /attendance` + kirim `latitude`, `longitude`, `schedule_id`
+4. Sistem validasi:
+   - ✅ User terdaftar di kelas tersebut
+   - ✅ Waktu masih dalam jadwal (±5 menit toleransi)
+   - ✅ Belum pernah berhasil absen (status `hadir`) untuk jadwal ini
+   - ✅ Jarak dalam radius lokasi (Haversine Formula)
+5. Status: `hadir` (dalam radius) atau `ditolak` (di luar radius)
+6. Jika `ditolak`, bisa retry unlimited sampai berhasil
+
+## Filament Admin Dashboard (`/admin`)
+
+6 resource modules: **Users, ClassRooms, Courses, Locations, Schedules, Attendances** + Dashboard Widgets
+
+## Yang Sudah Dikerjakan ✅
+
+- Full REST API v1 dengan versioning
+- Auth (login/logout/profile) via Sanctum
+- Geolocation validation (Haversine Formula)
+- Class management (pivot table `class_user`)
+- Schedule management dengan time tolerance
+- Attendance tracking (hadir/ditolak + retry)
+- Filament v4 admin panel (6 resources)
+- Database seeders (akun demo: admin + 2 mahasiswa)
+- Soft deletes di semua tabel utama
+- Rate limiting pada attendance submission
+- 47 property-based tests
+- Flutter mobile app guide ([guide.md](file:///d:/applications/Laravel%20projects/absensi-mhs/guide.md))
+
+## Yang Belum Diimplementasi 🔲
+
+### API Response Standardization (ada design doc, belum dicode)
+Spec lengkap ada di [design.md](file:///d:/applications/Laravel%20projects/absensi-mhs/.kiro/specs/api-response-standardization/design.md). Rencananya:
+- `ApiResponse` trait untuk standarisasi response format
+- Laravel API Resources (UserResource, AttendanceResource, dll.)
+- Centralized exception handling
+- Envelope pattern: `{ success, data, message, meta, errors }`
+
+## Default Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@kampus.ac.id | password |
+| Mahasiswa | budi@mahasiswa.ac.id | password |
+| Mahasiswa | siti@mahasiswa.ac.id | password |
+
+## Quick Start
+
+```bash
+php artisan serve              # API server (sudah jalan sekarang!)
+# Admin dashboard: http://localhost:8000/admin
+# API docs: http://localhost:8000/api/documentation
+```

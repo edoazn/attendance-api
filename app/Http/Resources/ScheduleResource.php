@@ -17,6 +17,9 @@ class ScheduleResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'class_id' => $this->class_id,
+            'course_id' => $this->course_id,
+            'location_id' => $this->location_id,
             'day' => $this->start_time?->format('l'), // Day name (e.g., Monday, Tuesday)
             'start_time' => $this->start_time?->toISOString(),
             'end_time' => $this->end_time?->toISOString(),

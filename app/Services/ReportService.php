@@ -22,7 +22,7 @@ class ReportService
         ?string $endDate = null,
         ?int $scheduleId = null
     ): Collection {
-        $query = Attendance::with(['user', 'schedule.course', 'schedule.location']);
+        $query = Attendance::with(['user', 'schedule.course', 'schedule.location', 'schedule.classRoom']);
 
         // Apply date range filter
         if ($startDate !== null) {

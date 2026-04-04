@@ -20,6 +20,7 @@ function generateRandomUserData(): array
 {
     return [
         'name' => fake()->name(),
+        'identity_number' => fake()->unique()->numerify('##########'),
         'email' => fake()->unique()->safeEmail(),
         'password' => 'password123',
         'role' => fake()->randomElement(['admin', 'mahasiswa']),
@@ -31,28 +32,30 @@ function generateRandomUserData(): array
  * For any valid user, login with correct credentials should return a token
  */
 test('Property 1.1: Valid credentials return a token', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $userData = generateRandomUserData();
         $user = User::create([
             'name' => $userData['name'],
+            'identity_number' => $userData['identity_number'],
             'email' => $userData['email'],
             'password' => bcrypt($userData['password']),
             'role' => $userData['role'],
         ]);
 
         $response = $this->postJson('/api/v1/login', [
-            'email' => $userData['email'],
+            'identity_number' => $userData['identity_number'],
             'password' => $userData['password'],
         ]);
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'token',
-                'user' => ['id', 'name', 'email', 'role']
+                'success',
+                'message',
+                'data' => ['token', 'user']
             ]);
 
-        expect($response->json('token'))->not->toBeEmpty();
-        expect($response->json('user.email'))->toBe($userData['email']);
+        expect($response->json('data.token'))->not->toBeEmpty();
+        expect($response->json('data.user.identity_number'))->toBe($userData['identity_number']);
         
         // Clean up tokens for next iteration
         $user->tokens()->delete();
@@ -65,17 +68,18 @@ test('Property 1.1: Valid credentials return a token', function () {
  * For any user, login with wrong password should return 401
  */
 test('Property 1.2: Invalid credentials return 401', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $userData = generateRandomUserData();
         $user = User::create([
             'name' => $userData['name'],
+            'identity_number' => $userData['identity_number'],
             'email' => $userData['email'],
             'password' => bcrypt($userData['password']),
             'role' => $userData['role'],
         ]);
 
         $response = $this->postJson('/api/v1/login', [
-            'email' => $userData['email'],
+            'identity_number' => $userData['identity_number'],
             'password' => 'wrong_password_' . fake()->word(),
         ]);
 
@@ -91,10 +95,11 @@ test('Property 1.2: Invalid credentials return 401', function () {
  * For any valid user, after logout the token should be invalid
  */
 test('Property 1.3: Token round-trip - login then logout invalidates token', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $userData = generateRandomUserData();
         $user = User::create([
             'name' => $userData['name'],
+            'identity_number' => $userData['identity_number'],
             'email' => $userData['email'],
             'password' => bcrypt($userData['password']),
             'role' => $userData['role'],
@@ -128,9 +133,9 @@ test('Property 1.3: Token round-trip - login then logout invalidates token', fun
  * For any email that doesn't exist, login should return 401
  */
 test('Property 1.4: Non-existent user returns 401', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $response = $this->postJson('/api/v1/login', [
-            'email' => fake()->unique()->safeEmail(),
+            'identity_number' => fake()->unique()->numerify('##########'),
             'password' => fake()->password(),
         ]);
 

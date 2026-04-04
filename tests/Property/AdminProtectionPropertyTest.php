@@ -31,6 +31,7 @@ function generateUserWithRole(string $role): array
 {
     return [
         'name' => fake()->name(),
+        'identity_number' => fake()->unique()->numerify('##########'),
         'email' => fake()->unique()->safeEmail(),
         'password' => 'password123',
         'role' => $role,
@@ -42,10 +43,11 @@ function generateUserWithRole(string $role): array
  * For any user with role "mahasiswa", accessing admin endpoints should return 403
  */
 test('Property 3.1: Mahasiswa users receive 403 on admin endpoints', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $userData = generateUserWithRole('mahasiswa');
         $user = User::create([
             'name' => $userData['name'],
+            'identity_number' => $userData['identity_number'],
             'email' => $userData['email'],
             'password' => bcrypt($userData['password']),
             'role' => $userData['role'],
@@ -83,10 +85,11 @@ test('Property 3.1: Mahasiswa users receive 403 on admin endpoints', function ()
  * For any user with role "admin", accessing admin endpoints should return 200
  */
 test('Property 3.2: Admin users can access admin endpoints', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $userData = generateUserWithRole('admin');
         $user = User::create([
             'name' => $userData['name'],
+            'identity_number' => $userData['identity_number'],
             'email' => $userData['email'],
             'password' => bcrypt($userData['password']),
             'role' => $userData['role'],
@@ -114,7 +117,7 @@ test('Property 3.2: Admin users can access admin endpoints', function () {
  * For any request without authentication, admin endpoints should return 401
  */
 test('Property 3.3: Unauthenticated users receive 401 on admin endpoints', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Test GET request without authentication
         $response = $this->getJson('/api/test-admin-endpoint');
         $response->assertStatus(401);

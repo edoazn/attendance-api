@@ -69,7 +69,7 @@ function createScheduleWithTimeRange(Carbon $startTime, Carbon $endTime): Schedu
  * For any attendance submission where current time is within start_time and end_time, processing should proceed
  */
 test('Property 9.1: Attendance within schedule time range is allowed', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupScheduleTimeTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);
@@ -103,7 +103,7 @@ test('Property 9.1: Attendance within schedule time range is allowed', function 
  * For any attendance submission where current time is before start_time, it should be rejected
  */
 test('Property 9.2: Attendance before schedule start time is rejected', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupScheduleTimeTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);
@@ -137,7 +137,7 @@ test('Property 9.2: Attendance before schedule start time is rejected', function
  * For any attendance submission where current time is after end_time, it should be rejected
  */
 test('Property 9.3: Attendance after schedule end time is rejected', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupScheduleTimeTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);

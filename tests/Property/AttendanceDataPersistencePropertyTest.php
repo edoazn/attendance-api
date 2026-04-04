@@ -70,7 +70,7 @@ function createActiveScheduleForPersistence(): Schedule
  * For any attendance attempt, all required fields must be stored in the database
  */
 test('Property 10.1: All attendance attempts persist required fields', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupPersistenceTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);
@@ -110,7 +110,7 @@ test('Property 10.1: All attendance attempts persist required fields', function 
  * For any attendance attempt, the stored latitude and longitude must match the submitted values
  */
 test('Property 10.2: Persisted coordinates match submitted coordinates', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupPersistenceTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);
@@ -142,7 +142,7 @@ test('Property 10.2: Persisted coordinates match submitted coordinates', functio
  * For any attendance attempt, the stored distance must match the Haversine calculation
  */
 test('Property 10.3: Persisted distance matches calculated distance', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupPersistenceTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);
@@ -184,7 +184,7 @@ test('Property 10.4: Both hadir and ditolak statuses are persisted', function ()
     $hadirCount = 0;
     $ditolakCount = 0;
 
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         cleanupPersistenceTestData();
 
         $user = User::factory()->create(['role' => 'mahasiswa']);

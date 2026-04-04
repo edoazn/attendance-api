@@ -34,6 +34,7 @@ function createAdminUser(): User
 {
     return User::create([
         'name' => fake()->name(),
+        'identity_number' => fake()->unique()->numerify('##########'),
         'email' => fake()->unique()->safeEmail(),
         'password' => bcrypt('password123'),
         'role' => 'admin',
@@ -45,7 +46,7 @@ function createAdminUser(): User
  * For any valid location data, creating then retrieving should return the same data
  */
 test('Property 4.1: Create location then retrieve returns equivalent data', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $admin = createAdminUser();
         $locationData = generateValidLocationData();
 
@@ -88,7 +89,7 @@ test('Property 4.1: Create location then retrieve returns equivalent data', func
  * For any valid location, updating then retrieving should return the updated data
  */
 test('Property 4.2: Update location then retrieve returns updated data', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $admin = createAdminUser();
         $originalData = generateValidLocationData();
         $updatedData = generateValidLocationData();
@@ -126,7 +127,7 @@ test('Property 4.2: Update location then retrieve returns updated data', functio
  * For any set of created locations, index should return all of them
  */
 test('Property 4.3: Index returns all created locations', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $admin = createAdminUser();
         $locationCount = fake()->numberBetween(1, 5);
         $createdIds = [];

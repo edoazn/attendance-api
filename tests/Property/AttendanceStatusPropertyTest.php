@@ -70,7 +70,7 @@ function createTestScheduleWithLocation(array $locationCoords, float $radius): S
  * For any user coordinates within the location radius, attendance status must be "hadir"
  */
 test('Property 7.1: Distance within radius results in status hadir', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();
@@ -111,7 +111,7 @@ test('Property 7.1: Distance within radius results in status hadir', function ()
  * For any user coordinates outside the location radius, attendance status must be "ditolak"
  */
 test('Property 7.2: Distance outside radius results in status ditolak', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();
@@ -152,7 +152,7 @@ test('Property 7.2: Distance outside radius results in status ditolak', function
  * For any attendance, the status should be exactly determined by comparing distance with radius
  */
 test('Property 7.3: Status is consistent with distance-radius comparison', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();

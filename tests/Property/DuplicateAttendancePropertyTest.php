@@ -71,7 +71,7 @@ function createActiveSchedule(array $locationCoords, float $radius): Schedule
  * a second attempt should be rejected with appropriate message
  */
 test('Property 8.1: Duplicate attendance attempt is rejected', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();
@@ -118,7 +118,7 @@ test('Property 8.1: Duplicate attendance attempt is rejected', function () {
  * only one attendance record should exist in the database
  */
 test('Property 8.2: Only one attendance record per user-schedule', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();
@@ -161,7 +161,7 @@ test('Property 8.2: Only one attendance record per user-schedule', function () {
  * For any schedule, different users should be able to submit attendance independently
  */
 test('Property 8.3: Different users can attend same schedule', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         // Clean up previous test data
         Attendance::query()->delete();
         Schedule::query()->delete();

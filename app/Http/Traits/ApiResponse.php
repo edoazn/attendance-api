@@ -80,12 +80,12 @@ trait ApiResponse
     /**
      * Return a collection response
      *
-     * @param ResourceCollection $collection
+     * @param \Illuminate\Http\Resources\Json\AnonymousResourceCollection $collection
      * @param string|null $message
      * @param int $status
      * @return JsonResponse
      */
-    protected function collection(ResourceCollection $collection, ?string $message = null, int $status = 200): JsonResponse
+    protected function collection(\Illuminate\Http\Resources\Json\AnonymousResourceCollection $collection, ?string $message = null, int $status = 200): JsonResponse
     {
         $response = [
             'success' => true,

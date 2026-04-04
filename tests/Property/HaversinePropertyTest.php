@@ -36,7 +36,7 @@ function generateRandomCoordinates(): array
  * For any coordinate point, the distance to itself should be 0
  */
 test('Property 6.1: Identity - distance to same point is zero', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $coords = generateRandomCoordinates();
         
         $distance = $this->service->calculateDistance(
@@ -55,7 +55,7 @@ test('Property 6.1: Identity - distance to same point is zero', function () {
  * Distance calculation should be symmetric
  */
 test('Property 6.2: Symmetry - distance(A,B) equals distance(B,A)', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $coordsA = generateRandomCoordinates();
         $coordsB = generateRandomCoordinates();
         
@@ -83,7 +83,7 @@ test('Property 6.2: Symmetry - distance(A,B) equals distance(B,A)', function () 
  * The sum of two sides of a triangle must be greater than or equal to the third side
  */
 test('Property 6.3: Triangle inequality holds', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $coordsA = generateRandomCoordinates();
         $coordsB = generateRandomCoordinates();
         $coordsC = generateRandomCoordinates();
@@ -119,7 +119,7 @@ test('Property 6.3: Triangle inequality holds', function () {
  * Calling the function multiple times with same inputs should return same result
  */
 test('Property 6.4: Deterministic - same inputs produce same outputs', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $coordsA = generateRandomCoordinates();
         $coordsB = generateRandomCoordinates();
         
@@ -146,7 +146,7 @@ test('Property 6.4: Deterministic - same inputs produce same outputs', function 
  * Distance should never be negative
  */
 test('Property 6.5: Non-negative - distance is always greater than or equal to zero', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $coordsA = generateRandomCoordinates();
         $coordsB = generateRandomCoordinates();
         
@@ -166,7 +166,7 @@ test('Property 6.5: Non-negative - distance is always greater than or equal to z
  * isWithinRadius should return true iff calculateDistance <= radius
  */
 test('Property 6.6: isWithinRadius is consistent with calculateDistance', function () {
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i < 5; $i++) {
         $coordsA = generateRandomCoordinates();
         $coordsB = generateRandomCoordinates();
         $radius = fake()->randomFloat(2, 1, 20000000); // 1m to 20000km

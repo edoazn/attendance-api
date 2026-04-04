@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ScheduleRequest;
+use App\Http\Resources\ScheduleResource;
+use App\Http\Traits\ApiResponse;
 use App\Models\Schedule;
 use Illuminate\Http\JsonResponse;
 
 class ScheduleController extends Controller
 {
+    use ApiResponse;
+
     /**
      * @OA\Get(
      *     path="/schedules",
@@ -57,9 +61,7 @@ class ScheduleController extends Controller
     {
         $schedules = Schedule::with(['classRoom', 'course', 'location'])->get();
 
-        return response()->json([
-            'data' => $schedules
-        ]);
+        return $this->collection(ScheduleResource::collection($schedules));
     }
 
     /**
@@ -106,9 +108,6 @@ class ScheduleController extends Controller
 
         $schedule->load(['classRoom', 'course', 'location']);
 
-        return response()->json([
-            'message' => 'Schedule created successfully',
-            'data' => $schedule
-        ], 201);
+        return $this->resource(new ScheduleResource($schedule), 'Schedule created successfully', 201);
     }
 }
