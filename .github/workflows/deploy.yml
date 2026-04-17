@@ -1,0 +1,56 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e
+            
+            cd /var/www/laravel
+            
+            echo ">>> Pull latest code"
+            git pull origin main
+            
+            echo ">>> Install dependencies"
+            composer install --optimize-autoloader --no-dev --no-interaction
+            
+            echo ">>> Clear & cache config"
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            echo ">>> Run migrations"
+            php artisan migrate --force
+            
+            echo ">>> Fix permissions"
+            sudo chown -R www-data:www-data /var/www/laravel/storage
+            sudo chown -R www-data:www-data /var/www/laravel/bootstrap/cache
+            
+            echo ">>> Restart PHP-FPM"
+            sudo systemctl restart php8.2-fpm
+            
+            echo ">>> Deployment complete!"
+          EOF
