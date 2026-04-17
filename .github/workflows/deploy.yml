@@ -32,8 +32,7 @@ jobs:
             git pull origin main
             
             echo ">>> Fix permissions"
-            sudo chown -R www-data:www-data /var/www/laravel/storage
-            sudo chown -R www-data:www-data /var/www/laravel/bootstrap/cache
+            sudo chown -R www-data:www-data /var/www/laravel
             sudo chmod -R 775 /var/www/laravel/storage /var/www/laravel/bootstrap/cache
             
             echo ">>> Install dependencies"
