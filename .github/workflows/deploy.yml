@@ -31,13 +31,13 @@ jobs:
             echo ">>> Pull latest code"
             git pull origin main
             
-            echo ">>> Install dependencies"
-            composer install --optimize-autoloader --no-dev --no-interaction
-            
             echo ">>> Fix permissions"
             sudo chown -R www-data:www-data /var/www/laravel/storage
             sudo chown -R www-data:www-data /var/www/laravel/bootstrap/cache
             sudo chmod -R 775 /var/www/laravel/storage /var/www/laravel/bootstrap/cache
+            
+            echo ">>> Install dependencies"
+            sudo -u www-data composer install --optimize-autoloader --no-dev --no-interaction
             
             echo ">>> Clear & cache config"
             sudo -u www-data php artisan config:clear
