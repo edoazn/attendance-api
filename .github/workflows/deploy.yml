@@ -34,20 +34,21 @@ jobs:
             echo ">>> Install dependencies"
             composer install --optimize-autoloader --no-dev --no-interaction
             
-            echo ">>> Clear & cache config"
-            php artisan config:clear
-            php artisan route:clear
-            php artisan view:clear
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            
-            echo ">>> Run migrations"
-            php artisan migrate --force
-            
             echo ">>> Fix permissions"
             sudo chown -R www-data:www-data /var/www/laravel/storage
             sudo chown -R www-data:www-data /var/www/laravel/bootstrap/cache
+            sudo chmod -R 775 /var/www/laravel/storage /var/www/laravel/bootstrap/cache
+            
+            echo ">>> Clear & cache config"
+            sudo -u www-data php artisan config:clear
+            sudo -u www-data php artisan route:clear
+            sudo -u www-data php artisan view:clear
+            sudo -u www-data php artisan config:cache
+            sudo -u www-data php artisan route:cache
+            sudo -u www-data php artisan view:cache
+            
+            echo ">>> Run migrations"
+            sudo -u www-data php artisan migrate --force
             
             echo ">>> Restart PHP-FPM"
             sudo systemctl restart php8.2-fpm
