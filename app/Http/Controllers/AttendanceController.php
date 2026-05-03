@@ -21,17 +21,20 @@ class AttendanceController extends Controller
      * @OA\Post(
      *     path="/attendance",
      *     summary="Submit absensi",
-     *     description="Mahasiswa submit absensi dengan koordinat GPS. Status akan 'hadir' jika dalam radius lokasi, 'ditolak' jika di luar radius.",
+     *     description="Mahasiswa submit absensi via tiga metode: geolocation (GPS), qr_code (scan QR), atau attendance_code (kode 6-digit manual).",
      *     operationId="storeAttendance",
      *     tags={"Attendance"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"schedule_id","latitude","longitude"},
+     *             required={"schedule_id","method"},
      *             @OA\Property(property="schedule_id", type="integer", example=1, description="ID jadwal yang akan diabsen"),
-     *             @OA\Property(property="latitude", type="number", format="float", example=-6.2000000, description="Latitude posisi user"),
-     *             @OA\Property(property="longitude", type="number", format="float", example=106.8166660, description="Longitude posisi user")
+     *             @OA\Property(property="method", type="string", enum={"geolocation","qr_code","attendance_code"}, example="geolocation", description="Metode absensi"),
+     *             @OA\Property(property="latitude", type="number", format="float", example=-6.2000000, description="Latitude (wajib jika method=geolocation)"),
+     *             @OA\Property(property="longitude", type="number", format="float", example=106.8166660, description="Longitude (wajib jika method=geolocation)"),
+     *             @OA\Property(property="qr_token", type="string", example="uuid-token", description="QR token (wajib jika method=qr_code)"),
+     *             @OA\Property(property="attendance_code", type="string", example="ABC123", description="Kode 6-digit (wajib jika method=attendance_code)")
      *         )
      *     ),
      *     @OA\Response(
@@ -39,16 +42,15 @@ class AttendanceController extends Controller
      *         description="Absensi berhasil diproses",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", enum={"hadir", "ditolak"}, example="hadir"),
-     *             @OA\Property(property="distance", type="number", format="float", example=45.23, description="Jarak dari lokasi dalam meter"),
+     *             @OA\Property(property="distance", type="number", format="float", nullable=true, example=45.23),
+     *             @OA\Property(property="method", type="string", example="geolocation"),
      *             @OA\Property(property="message", type="string", example="Absensi berhasil dicatat")
      *         )
      *     ),
      *     @OA\Response(
      *         response=422,
-     *         description="Absensi gagal (di luar waktu jadwal atau sudah absen)",
+     *         description="Absensi gagal",
      *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="string", nullable=true),
-     *             @OA\Property(property="distance", type="number", nullable=true),
      *             @OA\Property(property="message", type="string", example="Absensi hanya dapat dilakukan pada waktu jadwal aktif")
      *         )
      *     ),
@@ -59,9 +61,9 @@ class AttendanceController extends Controller
     {
         $result = $this->attendanceService->processAttendance(
             $request->user(),
-            $request->schedule_id,
-            $request->latitude,
-            $request->longitude
+            (int) $request->schedule_id,
+            $request->method,
+            $request->only(['latitude', 'longitude', 'qr_token', 'attendance_code'])
         );
 
         if (!$result['success']) {
@@ -73,8 +75,9 @@ class AttendanceController extends Controller
         }
 
         return $this->success([
-            'status' => $result['status'],
-            'distance' => $result['distance'],
+            'status'     => $result['status'],
+            'distance'   => $result['distance'],
+            'method'     => $result['method'],
             'attendance' => new AttendanceResource($result['attendance']),
         ], $result['message'], 200);
     }

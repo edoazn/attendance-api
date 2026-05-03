@@ -37,6 +37,8 @@ Route::prefix('v1')->group(function () {
             // Schedule management
             Route::get('/schedules', [ScheduleController::class, 'index']);
             Route::post('/schedules', [ScheduleController::class, 'store']);
+            Route::post('/schedules/{id}/generate-code', [ScheduleController::class, 'generateCode']);
+            Route::post('/schedules/{id}/generate-qr', [ScheduleController::class, 'generateQr']);
 
             // Reports
             Route::get('/reports/attendance', [ReportController::class, 'attendanceReport']);

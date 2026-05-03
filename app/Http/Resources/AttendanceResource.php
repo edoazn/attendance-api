@@ -16,11 +16,12 @@ class AttendanceResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'status' => $this->status,
-            'distance' => (float) $this->distance,
-            'latitude' => (float) $this->latitude,
-            'longitude' => (float) $this->longitude,
+            'id'         => $this->id,
+            'status'     => $this->status,
+            'method'     => $this->method,
+            'distance'   => $this->distance !== null ? (float) $this->distance : null,
+            'latitude'   => $this->latitude  !== null ? (float) $this->latitude  : null,
+            'longitude'  => $this->longitude !== null ? (float) $this->longitude : null,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
 

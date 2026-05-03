@@ -16,26 +16,30 @@ class ScheduleResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'class_id' => $this->class_id,
-            'course_id' => $this->course_id,
+            'id'          => $this->id,
+            'class_id'    => $this->class_id,
+            'course_id'   => $this->course_id,
             'location_id' => $this->location_id,
-            'day' => $this->start_time?->format('l'), // Day name (e.g., Monday, Tuesday)
-            'start_time' => $this->start_time?->toISOString(),
-            'end_time' => $this->end_time?->toISOString(),
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'day'         => $this->start_time?->format('l'), // e.g. Monday
+            'start_time'  => $this->start_time?->toISOString(),
+            'end_time'    => $this->end_time?->toISOString(),
+            'is_active'   => $this->isActive(),
+            // Attendance method availability flags (useful for Android to know which tabs to show)
+            'has_qr'          => filled($this->qr_token),
+            'has_active_code' => $this->isCodeValid(),
+            'created_at'  => $this->created_at?->toISOString(),
+            'updated_at'  => $this->updated_at?->toISOString(),
 
             // Conditional relationship loading
-            'class_room' => $this->whenLoaded('classRoom', function () {
-                return new ClassRoomResource($this->classRoom);
-            }),
-            'course' => $this->whenLoaded('course', function () {
-                return new CourseResource($this->course);
-            }),
-            'location' => $this->whenLoaded('location', function () {
-                return new LocationResource($this->location);
-            }),
+            'class_room' => $this->whenLoaded('classRoom', fn () =>
+                new ClassRoomResource($this->classRoom)
+            ),
+            'course' => $this->whenLoaded('course', fn () =>
+                new CourseResource($this->course)
+            ),
+            'location' => $this->whenLoaded('location', fn () =>
+                new LocationResource($this->location)
+            ),
         ];
     }
 }

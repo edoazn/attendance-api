@@ -99,15 +99,88 @@ class ScheduleController extends Controller
     public function store(ScheduleRequest $request): JsonResponse
     {
         $schedule = Schedule::create([
-            'class_id' => $request->class_id,
-            'course_id' => $request->course_id,
+            'class_id'    => $request->class_id,
+            'course_id'   => $request->course_id,
             'location_id' => $request->location_id,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'start_time'  => $request->start_time,
+            'end_time'    => $request->end_time,
         ]);
 
         $schedule->load(['classRoom', 'course', 'location']);
 
         return $this->resource(new ScheduleResource($schedule), 'Schedule created successfully', 201);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/schedules/{id}/generate-code",
+     *     summary="Generate kode absensi manual",
+     *     description="Generate kode 6-digit untuk absensi manual. Admin only.",
+     *     operationId="generateAttendanceCode",
+     *     tags={"Schedules"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="minutes_valid", type="integer", example=30,
+     *                 description="Durasi berlaku kode dalam menit (default 30)")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Kode berhasil di-generate",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="attendance_code", type="string", example="ABC123"),
+     *             @OA\Property(property="expires_at", type="string", format="date-time")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Schedule not found")
+     * )
+     */
+    public function generateCode(\Illuminate\Http\Request $request, int $id): JsonResponse
+    {
+        $schedule = Schedule::findOrFail($id);
+        $minutes  = (int) $request->input('minutes_valid', 30);
+        $minutes  = max(1, min($minutes, 1440)); // clamp 1–1440 min
+
+        $code = $schedule->generateAttendanceCode($minutes);
+
+        return $this->success([
+            'attendance_code' => $code,
+            'expires_at'      => $schedule->code_expires_at->toISOString(),
+            'minutes_valid'   => $minutes,
+        ], 'Kode absensi berhasil di-generate');
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/schedules/{id}/generate-qr",
+     *     summary="Generate QR token jadwal",
+     *     description="Generate atau regenerate QR token untuk jadwal. QR lama akan tidak berfungsi. Admin only.",
+     *     operationId="generateQrToken",
+     *     tags={"Schedules"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="QR token berhasil di-generate",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="qr_token", type="string", example="550e8400-e29b-41d4-a716-446655440000")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Forbidden - Admin only"),
+     *     @OA\Response(response=404, description="Schedule not found")
+     * )
+     */
+    public function generateQr(int $id): JsonResponse
+    {
+        $schedule = Schedule::findOrFail($id);
+        $token    = $schedule->generateQrToken();
+
+        return $this->success([
+            'qr_token'    => $token,
+            'schedule_id' => $schedule->id,
+        ], 'QR token berhasil di-generate');
     }
 }

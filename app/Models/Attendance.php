@@ -17,12 +17,13 @@ class Attendance extends Model
         'longitude',
         'distance',
         'status',
+        'method',
     ];
 
     protected $casts = [
-        'latitude' => 'decimal:7',
+        'latitude'  => 'decimal:7',
         'longitude' => 'decimal:7',
-        'distance' => 'decimal:2',
+        'distance'  => 'decimal:2',
     ];
 
     public function user(): BelongsTo

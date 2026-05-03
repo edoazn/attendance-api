@@ -34,13 +34,29 @@ class AttendancesTable
                     ->label('Status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'hadir' => 'success',
+                        'hadir'   => 'success',
                         'ditolak' => 'danger',
-                        default => 'gray',
+                        default   => 'gray',
+                    }),
+                TextColumn::make('method')
+                    ->label('Metode')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'geolocation'     => 'info',
+                        'qr_code'         => 'warning',
+                        'attendance_code' => 'primary',
+                        default           => 'gray',
+                    })
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'geolocation'     => 'Geolokasi',
+                        'qr_code'         => 'QR Code',
+                        'attendance_code' => 'Kode Manual',
+                        default           => $state ?? '—',
                     }),
                 TextColumn::make('distance')
                     ->label('Jarak')
                     ->suffix(' m')
+                    ->placeholder('—')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Waktu Absensi')
@@ -51,8 +67,15 @@ class AttendancesTable
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options([
-                        'hadir' => 'Hadir',
+                        'hadir'   => 'Hadir',
                         'ditolak' => 'Ditolak',
+                    ]),
+                SelectFilter::make('method')
+                    ->label('Metode')
+                    ->options([
+                        'geolocation'     => 'Geolokasi',
+                        'qr_code'         => 'QR Code',
+                        'attendance_code' => 'Kode Manual',
                     ]),
                 Filter::make('created_at')
                     ->form([

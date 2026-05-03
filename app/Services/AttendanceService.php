@@ -15,53 +15,58 @@ class AttendanceService
     ) {}
 
     /**
-     * Process attendance submission for a user
+     * Process attendance submission for a user.
+     * Dispatches to the correct handler based on $method.
      *
-     * @param User $user The user submitting attendance
-     * @param int $scheduleId The schedule ID
-     * @param float $latitude User's latitude
-     * @param float $longitude User's longitude
-     * @return array Response with status, distance, and message
+     * @param User   $user       The user submitting attendance
+     * @param int    $scheduleId The schedule ID
+     * @param string $method     'geolocation' | 'qr_code' | 'attendance_code'
+     * @param array  $data       Method-specific payload
+     * @return array Response with success, status, distance, method, message, attendance
      */
     public function processAttendance(
         User $user,
         int $scheduleId,
-        float $latitude,
-        float $longitude
+        string $method,
+        array $data
     ): array {
         $schedule = Schedule::with('location')->findOrFail($scheduleId);
 
-        // Validate user belongs to the class
+        // --- Shared validations (all methods) ---
+
         if (!$this->validateUserClass($user, $schedule)) {
-            return [
-                'success' => false,
-                'status' => null,
-                'distance' => null,
-                'message' => 'Anda tidak terdaftar di kelas ini',
-            ];
+            return $this->failure('Anda tidak terdaftar di kelas ini');
         }
 
-        // Validate schedule time
         if (!$this->validateScheduleTime($schedule)) {
-            return [
-                'success' => false,
-                'status' => null,
-                'distance' => null,
-                'message' => 'Absensi hanya dapat dilakukan pada waktu jadwal aktif',
-            ];
+            return $this->failure('Absensi hanya dapat dilakukan pada waktu jadwal aktif');
         }
 
-        // Check for duplicate attendance
         if ($this->checkDuplicateAttendance($user, $schedule)) {
-            return [
-                'success' => false,
-                'status' => null,
-                'distance' => null,
-                'message' => 'Anda sudah melakukan absensi untuk jadwal ini',
-            ];
+            return $this->failure('Anda sudah melakukan absensi untuk jadwal ini');
         }
 
-        // Calculate distance using GeolocationService
+        // --- Method-specific handling ---
+
+        return match ($method) {
+            'geolocation'     => $this->handleGeolocation($user, $schedule, $data),
+            'qr_code'         => $this->handleQrCode($user, $schedule, $data),
+            'attendance_code' => $this->handleAttendanceCode($user, $schedule, $data),
+        };
+    }
+
+    // -------------------------------------------------------------------------
+    // Private handlers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Handle geolocation-based attendance (existing logic, unchanged).
+     */
+    private function handleGeolocation(User $user, Schedule $schedule, array $data): array
+    {
+        $latitude  = (float) $data['latitude'];
+        $longitude = (float) $data['longitude'];
+
         $distance = $this->geolocationService->calculateDistance(
             $latitude,
             $longitude,
@@ -69,18 +74,17 @@ class AttendanceService
             (float) $schedule->location->longitude
         );
 
-        // Determine status based on distance and radius
         $isWithinRadius = $distance <= (float) $schedule->location->radius;
-        $status = $isWithinRadius ? 'hadir' : 'ditolak';
+        $status         = $isWithinRadius ? 'hadir' : 'ditolak';
 
-        // Store attendance record
         $attendance = Attendance::create([
-            'user_id' => $user->id,
+            'user_id'     => $user->id,
             'schedule_id' => $schedule->id,
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-            'distance' => $distance,
-            'status' => $status,
+            'latitude'    => $latitude,
+            'longitude'   => $longitude,
+            'distance'    => $distance,
+            'status'      => $status,
+            'method'      => 'geolocation',
         ]);
 
         $message = $isWithinRadius
@@ -88,20 +92,98 @@ class AttendanceService
             : 'Absensi ditolak karena lokasi di luar radius';
 
         return [
-            'success' => true,
-            'status' => $status,
-            'distance' => round($distance, 2),
+            'success'    => true,
+            'status'     => $status,
+            'distance'   => round($distance, 2),
+            'method'     => 'geolocation',
             'attendance' => $attendance,
-            'message' => $message,
+            'message'    => $message,
         ];
     }
 
     /**
-     * Validate if user belongs to the schedule's class
-     *
-     * @param User $user
-     * @param Schedule $schedule
-     * @return bool
+     * Handle QR Code-based attendance.
+     * Matches the provided qr_token against the schedule's stored qr_token.
+     */
+    private function handleQrCode(User $user, Schedule $schedule, array $data): array
+    {
+        $providedToken = $data['qr_token'] ?? '';
+
+        if (empty($schedule->qr_token) || $schedule->qr_token !== $providedToken) {
+            return $this->failure('QR Code tidak valid untuk jadwal ini');
+        }
+
+        $attendance = Attendance::create([
+            'user_id'     => $user->id,
+            'schedule_id' => $schedule->id,
+            'status'      => 'hadir',
+            'method'      => 'qr_code',
+        ]);
+
+        return [
+            'success'    => true,
+            'status'     => 'hadir',
+            'distance'   => null,
+            'method'     => 'qr_code',
+            'attendance' => $attendance,
+            'message'    => 'Absensi via QR Code berhasil dicatat',
+        ];
+    }
+
+    /**
+     * Handle manual 6-digit code attendance.
+     * Validates the code and its expiry time.
+     */
+    private function handleAttendanceCode(User $user, Schedule $schedule, array $data): array
+    {
+        $providedCode = strtoupper($data['attendance_code'] ?? '');
+
+        if (empty($schedule->attendance_code)) {
+            return $this->failure('Kode absensi belum dibuat untuk jadwal ini');
+        }
+
+        if ($schedule->attendance_code !== $providedCode) {
+            return $this->failure('Kode absensi tidak valid');
+        }
+
+        if (!$schedule->isCodeValid()) {
+            return $this->failure('Kode absensi sudah kedaluwarsa');
+        }
+
+        $attendance = Attendance::create([
+            'user_id'     => $user->id,
+            'schedule_id' => $schedule->id,
+            'status'      => 'hadir',
+            'method'      => 'attendance_code',
+        ]);
+
+        return [
+            'success'    => true,
+            'status'     => 'hadir',
+            'distance'   => null,
+            'method'     => 'attendance_code',
+            'attendance' => $attendance,
+            'message'    => 'Absensi via kode manual berhasil dicatat',
+        ];
+    }
+
+    // -------------------------------------------------------------------------
+    // Shared private helpers
+    // -------------------------------------------------------------------------
+
+    private function failure(string $message): array
+    {
+        return [
+            'success'    => false,
+            'status'     => null,
+            'distance'   => null,
+            'method'     => null,
+            'message'    => $message,
+        ];
+    }
+
+    /**
+     * Validate if user belongs to the schedule's class.
      */
     private function validateUserClass(User $user, Schedule $schedule): bool
     {
@@ -109,10 +191,7 @@ class AttendanceService
     }
 
     /**
-     * Validate if current time is within schedule time range
-     *
-     * @param Schedule $schedule
-     * @return bool
+     * Validate if current time is within schedule time range.
      */
     private function validateScheduleTime(Schedule $schedule): bool
     {
@@ -120,12 +199,8 @@ class AttendanceService
     }
 
     /**
-     * Check if user has already successfully attended this schedule
-     * Only blocks if status is 'hadir', allows retry if 'ditolak'
-     *
-     * @param User $user
-     * @param Schedule $schedule
-     * @return bool True if already attended (hadir)
+     * Check if user has already successfully attended this schedule.
+     * Only blocks if status is 'hadir', allows retry if 'ditolak'.
      */
     private function checkDuplicateAttendance(User $user, Schedule $schedule): bool
     {
@@ -135,12 +210,12 @@ class AttendanceService
             ->exists();
     }
 
+    // -------------------------------------------------------------------------
+    // Query helpers
+    // -------------------------------------------------------------------------
+
     /**
-     * Get user's attendance history with schedule details (paginated)
-     *
-     * @param User $user
-     * @param int $perPage
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * Get user's attendance history with schedule details (paginated).
      */
     public function getUserHistory(User $user, int $perPage = 15)
     {
@@ -151,14 +226,11 @@ class AttendanceService
     }
 
     /**
-     * Get today's schedules for user's classes
-     *
-     * @param User $user
-     * @return Collection
+     * Get today's schedules for user's classes.
      */
     public function getTodaySchedules(User $user): Collection
     {
-        $today = Carbon::today();
+        $today       = Carbon::today();
         $userClassIds = $user->classes()->pluck('classes.id');
 
         return Schedule::with(['classRoom', 'course', 'location'])
